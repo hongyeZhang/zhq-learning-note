@@ -1,0 +1,344 @@
+create table example0(
+id int,
+name varchar(20),
+sex boolean
+);
+
+create table example2(
+stu_id int not null   primary key,
+stu_name varchar(20),
+stu_sex boolean
+);
+
+create table example3(
+stu_id int,
+stu_name varchar(20),
+stu_sex boolean,
+primary key(stu_name, stu_sex)
+);
+
+完整的字段包括字段名、数据类型、完整性约束条件
+
+========================      Chapter6   table 操作     ========================
+describe <tableName>  查看表结构
+desc <tableName>
+show create table <tableName>  查看表创立的详细信息
+alter table <originName> rename <newName>   修改表的名字
+alter table <tableName> modify <propertyName> <dataType>  修改字段数据类型
+alter table <tableName> change <originPropertyName> <newPropertyName> <newPropertyDataType>  修改字段名
+字段改名之后，会有部分约束条件消失，所以需要加上约束条件，查看表的状态
+表中添加字段
+alter table <tableName> add <propertyName> <propertyDataType> [完整性约束条件] [first | after <propertyName2>]
+alter table <tableName> drop <propertyName> 删除表中已经存在的字段
+修改字段的排列位置
+alter table <tableName> modify <propertyName1> <dataType1> [first | after] <propertyName2>
+alter table <tableName> engine=MyISAM  更改数据引擎
+删除外键约束
+alter table <tableName> drop foreign key <alias>
+drop table <tableName> 删除没有被关联的普通表
+删除存在外键关联的表格时，需要首先删除外键约束，然后再执行删除表格的语句
+
+
+========================      Chapter7   索引     ========================
+索引由数据库表中的一列或者多列组合而成，其目的是提高数据库中的查询速度
+（1）在创建表的时候创建索引
+create table index1 (
+id int,
+name varchar(20),
+sex boolean,
+index(id)
+);
+show create table index1\G;   查看建立的信息
+单列索引
+create table index4 (
+id int,
+subject  varchar(20),
+index index4_st(subject(10))
+);
+
+创建多列索引
+create table index5 (
+id int,
+name  varchar(20),
+sex varchar(5),
+index index5(name, sex)
+);
+
+在已经存在的表上创建索引：
+create index7_id on table example0(id);
+创建唯一性索引
+create unique index8_id on example1(id);
+通过alter table语句也可以修改
+alter table index1 add index index1_name(name(10));
+删除索引：drop index <indexName> on <tableName>
+
+
+========================      Chapter8   视图     ========================
+视图是在原有的表或者视图的基础上重新定义的虚拟表，可以从原有的表上选取对用户有用的信息
+起到类似筛选的作用
+create view <viewName> as select * from <tableName>
+create view <viewName> as select (property1, property2, ...) from <tableName>
+
+两个及以上的表中创建视图 ：在department 表和 worker 表上
+create algorithm = merge view <viewName> worker_view(name, department, sex)
+as select name, department
+from worker, department  where worker.id = department.id
+with local check option;
+
+查看视图：desc <viewName>
+show table status like <viewName>
+show create view
+修改或创建视图：
+create or replace algorithm = [temptable] view <viewName> <propertyList>
+as select <propertyList> from <tableName>
+仅仅是修改视图
+alter view [后面的与其他几个命令一致]
+删除视图：drop view if exists <viewName1, viewName2>
+
+
+========================      Chapter9   触发器     ========================
+创建单个执行语句的触发器
+create trigger <触发器名>  before|after <触发事件> on <tableName> for each row <执行语句>
+创建多个执行语句的触发器
+create trigger <触发器名>  before|after <触发事件> on <tableName> for each row
+begin
+<执行语句>
+end
+
+eg
+create table trigger_time (
+exec_time datetime
+);
+
+create table student (
+id int primary key,
+name varchar(10)
+);
+
+create trigger trigger1 before insert on student for each row insert into trigger_time values(now());
+show triggers;  查询触发器
+drop trigger <triggerName> 删除触发器
+
+
+========================      Chapter10   查询数据     ========================
+select 属性名表 form  表名和视图列表  [where 条件表达式1] [group by 属性名1 [having 条件表达式2]]
+                                    [order by 属性名2 [ASC|DESC]]
+单表查询
+select * from <tableName> 但是不能规定属性的显示顺利
+select propertyName1, propertyName2 from <tableName>
+select * from <tableName> where name = 'zhq';
+select * from <tableName> where id in | not in (1,2,3);
+select * from <tableName> where age [not] between 15 and 25;
+select * from <tableName> where name [not] like 'zhq';  当like中不使用通配符的时候，like 与 = 作用一致
+通配符  % 可以匹配任意长度，而 _ 只能匹配单个长度，匹配的字符串 单引号 和 双引号 都行
+select * from <tableName> where propertyName is [not] null; 查询是null的字段记录
+多条件查询： and 全部符合，or 只有一个条件符合就行
+select distinct <propertyName> from <tableName>  消除重复的属性
+select * from <tableName> order by age ASC;
+多个排序条件的时候，先按照第一个条件进行排序，在第一个条件相同的情况下，再按照之后的条件排序，以此类推
+
+create table employee (
+num int primary key,
+id int,
+name varchar(10),
+age int,
+sex varchar(2),
+adress varchar(30)
+)engine=InnoDB default charset=utf8;
+
+insert into employee (num, id ,name, age, sex, adress) values (1,1001,'张三',20,'男','北京');
+insert into employee (num, id ,name, age, sex, adress) values (2,1002,"张四",18,"女","上海");
+insert into employee (num, id ,name, age, sex, adress) values (3,1003,'张五',19,'男','北京');
+insert into employee (num, id ,name, age, sex, adress) values (4,1004,'张六',26,'男','深圳');
+insert into employee (num, id ,name, age, sex, adress) values (5,1005,'张七',33,'女','青岛');
+
+create table department (
+id int,
+d_name varchar(30),
+function varchar(30),
+d_address varchar(30)
+)engine=InnoDB default charset=utf8;
+
+insert into department (id, d_name, function, d_address) values (1001, '科研部', '研发产品', '研发一楼');
+insert into department (id, d_name, function, d_address) values (1002, '生产部', '生产产品', '研发二楼');
+insert into department (id, d_name, function, d_address) values (1003, '销售部', '销售产品', '研发三楼');
+insert into department (id, d_name, function, d_address) values (1005, '后勤部', '保障产品', '研发四楼');
+
+
+group by 关键字在单独使用时，只能查出每个组的一条记录，使用意义不大
+select sex, group_concat(name) from employee group by sex;
+select sex, count(sex) from employee group by sex;
+其他函数 sum() max() min() avg()
+having 条件加上限制结果
+select sex, count(sex) from employee group by sex having count(sex)>=2;
+select sex, count(sex) from employee group by sex with rollup;  最后显示所有记录的总和
+
+展示固定条数的记录数
+select * from employee limit 2;
+limit <初始位置， 记录数>
+select * from employee limit 1,2;
+select count(*) from employee; 统计一个表中的记录数
+select id, count(*) from employee group by id;
+select course, avg(score) from grade froup by course;
+
+连接查询：内连接查询、外连接查询、符合条件查询
+
+内连接查询只查询出指定字段取值相同的记录
+select num, name, age, sex, function, d_address from employee, department where employee.id = department.id;
+符合条件查询，加上查询的限制条件
+select num, name, age, sex, function, d_address from employee, department where employee.id = department.id and age>24;
+左连接查询，可查询出左边表格的所有数据，而右边表格只能查询出匹配的数据；而右连接相反。
+select num, name, age, sex, function, d_address from employee left | right join department on employee.id = department.id;
+子连接查询
+select * from employee where id in (select id from department);
+比较运算符  != 和 <> 二者的意思相同
+带有 exists 关键字的查询，结果是 true 或者 false
+select * from employee where [not] exists (select name from department where id = 1001);
+ANY:满足任意一个结果，all：满足所有的结果
+select * from computer_stu where score >= any(select score from scholarship);
+union关键字：合并之后去除重复记录， union all 合并之后不去除重复记录
+select id from employee union select id from department;
+
+
+select * from employee e where e.id = 1001;  表格取别名，其中e为表的别名
+select id as id_id from employee;   字段取别名
+
+正则表达式进行 模糊查询
+属性名  regexp  '匹配方式'
+select name from <tableName> where name regexp '^l'; 匹配以L开头的名字
+select name from <tableName> where name regexp 'c$'; 匹配以c结尾的名字
+select name from <tableName> where name regexp '^l..y$'; 匹配以L开头，y结尾的四字字符
+select name from <tableName> where name regexp '[ceo]'; 匹配包含c e o 任意一个字符的字符串
+select name from <tableName> where name regexp '[^ceo0-9]'; 匹配除了c e o和0-9的任意一个字符的字符串
+select name from <tableName> where name regexp 'ic|uc|ab'; 匹配包括其中任意一个的字符串，中间不能够有空格，否则查询错误
+
+
+========================      Chapter11   插入、更新与删除数据     ========================
+插入所有的字段，要么全写，要么不写，字符串类型的数据必须要加上引号
+insert into department (id, d_name, function, d_address) values (1005, '后勤部', '保障产品', '研发四楼');
+insert into department values (1005, '后勤部', '保障产品', '研发四楼');
+插入多条数据
+insert into department (id, d_name, function, d_address) values (1007, '销售部', '销售产品', '研发三楼'),
+(1008, '销售部2', '销售产品2', '研发三楼2');
+将查询出来的结果插入新的表格  insert into product (name, property) select name, property from medicine;
+update department set d_name= '二狗子' where id = 1001;
+delete from <tableName> where 条件;
+delete from <tableName> 将表中的所有记录删除
+
+========================      Chapter12   MySQL 运算符     ========================
+select a, a+3, a/3, a div 3 from t1;
+create table t1(
+a int
+)engine=InnoDB default charset=utf8;
+
+不等于 <>  !=   等于 = 或 <=>
+操作符都不能用来判断null，如果需要判断，则使用 is null, is not null
+通配符：_代表单个字符，% 代表任意多个字符
+&& 与 and  表示与操作符  || 和 or  表示或运算
+直接查看运行结果  select 1||null, null||null, 0||null;
+
+========================      Chapter13   MySQL 函数     ========================
+select abs(-0.5), pi(), abs(0.5);
+select rand(), rand(), rand(2), rand(2);
+select concat('bei', 'jing'), concat_ws('-','bei','jing');
+select repeat('mysql', 2);
+日期和时间函数
+select curdate(), current_date(), curtime(), current_time();
+now() 和 current_timestamp()都表示系统当前的日期和时间
+select benchmark(count, exp); 将exp执行count次，返回执行的时间
+
+
+========================      Chapter14   储存过程和函数     ========================
+========================  这章很重要  =============================
+存储过程和函数是在mysql服务其中执行的， 已经写好的一段sql语句
+创建存储过程：
+create procedure num_from_employee(in emp_id int, out count_num int)
+reads sql data
+begin
+select count(*) into count_num from employee where id = emp_id;
+end
+
+但是实际运行时，需要临时将结束符号替换
+delimiter &&
+create procedure num_from_employee(in emp_id int, out count_num int)
+reads sql data
+begin
+select count(*) into count_num from employee where id = emp_id;
+end&&
+delimiter ;
+
+
+创建函数
+create function name_from_employee(emp_id int)
+returns varchar(10)
+begin
+return (select name from employee where id = emp_id);
+end
+但是实际运行时
+delimiter &&
+create function name_from_employee(emp_id int)
+returns varchar(10)
+begin
+return (select name from employee where id = emp_id);
+end&&
+delimiter ;
+声明变量 declare <variableName> int default 10;
+赋值变量 set mysql = 3;
+声明光标：declare <cursorName> cursor for select name, age from employee;
+打开光标：open <cursorName>
+使用光标：fetch <cursorName> into emp_name, emp_age;
+关闭：close
+
+loop :循环执行，leave：跳出循环，iterate：跳出本次循环
+存储过程：call调用，存储函数：与内部函数的使用方法一致，但是执行是需要execute权限
+调用储存过程： call num_from_employee(1002, @shit);
+查询储存过程或者函数
+show procedure status like 'num_from_employee'\G;
+show create procedure num_from_employee\G;  更加详细一些
+show function  status like 'name_from_employee'\G;
+
+修改存储过程
+alter procedure num_from_employee
+modifies sql data
+sql security invoker;
+删除：drop procedure | function <name>;
+
+========================      Chapter15   MySQL 用户管理     ========================
+mysql 数据库下存储权限表
+新建用户
+(1) create user 'test1'@'localhost' identified by 'test1';
+用户名：test1 主机名：localhost  密码：test1
+
+(2) insert mysql.user(host, user, password) values(...)
+执行完成之后使用户生效 flush privileges;
+
+(3) grant语句
+
+删除用户：drop user 'test1'@'localhost'
+或者  delete from mysql.user where host = <hostName> and user = <userName>;
+修改root用户的密码： mysqladmin -u username -p password "new_password"
+root用户可以修改本身的密码以及其他账户的密码
+自身修改  set password password("new_password");
+修改其他用户的密码  set password for 'test1'@'localhost'=password("test");
+grant select on *.* to 'test3'@'localhost' identified by 'mytest3';
+grant  授权 revoke 收回权限
+查看用户的授权  show grants for 'test1'@'localhost';
+
+
+========================      Chapter16   数据备份与还原     ====================
+查看mysqldump  备份数据库
+这章没啥可看的
+
+========================      Chapter17   日志     =============================
+这章没啥可看的
+
+
+========================      Chapter18   性能优化     ==========================
+show status like 'connections';  查询数据库的连接次数
+分析查询语句：
+explain select * from employee\G;
+建立索引：create index index_name on student(name);
+建立多列索引：create index index_birth_department on student(birth, department);
+多列索引使用时，只有查询条件中使用了这个索引中的第一个字段时，才会起作用。
+
+尽量不要使用子查询，使用连接查询来代替

@@ -1,0 +1,32 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3.7.7-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    restart: always
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+
+# vi docker-compose.yml
+# 其中 RABBITMQ_DEFAULT_USER 为用户名，RABBITMQ_DEFAULT_PASS 为用户密码，
+# 5672为rabbitmq的服务端口，15672为rabbitmq的web管理界面端口。
+# 版本替换：image: rabbitmq:management-alpine
+
+
+# docker run -d --name rabbitmq3.7.7 -p 5672:5672 -p 15672:15672 -v `pwd`/data:/var/lib/rabbitmq --hostname myRabbit -e RABBITMQ_DEFAULT_VHOST=my_vhost  -e RABBITMQ_DEFAULT_USER=admin -e RABBITMQ_DEFAULT_PASS=admin df80af9ca0c9
+# -d 后台运行容器；
+# --name 指定容器名；
+# -p 指定服务运行的端口（5672：应用访问端口；15672：控制台Web端口号）；
+# -v 映射目录或文件；
+# --hostname  主机名（RabbitMQ的一个重要注意事项是它根据所谓的 “节点名称” 存储数据，默认为主机名）；
+# -e 指定环境变量；（RABBITMQ_DEFAULT_VHOST：默认虚拟机名；RABBITMQ_DEFAULT_USER：默认的用户名；RABBITMQ_DEFAULT_PASS：默认用户名的密码）

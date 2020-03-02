@@ -1,0 +1,14 @@
+
+查看mysql版本【未登录即可查看】： mysql -v
+select version();
+
+设置root账号的登录密码
+set password for 'root'@'localhost' = password('123456');
+
+
+mysql 允许外部连接操作步骤
+use mysql;
+修改权限：GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '123456' WITH GRANT OPTION;
+root 用户，密码为123456
+更新user： flush privileges;
+查看  select host, user from user;

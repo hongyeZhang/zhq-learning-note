@@ -1,0 +1,80 @@
+Invocation   调用
+inject   注入
+hint     提示
+profile  侧面；轮廓；外形；剖面；简况CyclicBarrierCyclicBarrierCyclicBarrierCyclicBarrier
+tenure   任期内
+verbose  冗长的；啰嗦的
+reentrant 可重入
+delegate  委托
+
+concurrent  并发
+semaphore  信号量
+schedule  计划、安排
+bounded  有界的
+demonstrate  展示，显示
+percolate  过滤；渗出；浸透
+recursive  递归的；循环的
+halve  减半
+trial 试验；审讯；努力；磨炼
+throughput 吞吐量 生产量，生产能力
+utility 实用；效用；公共设施；功用
+pivot 枢轴；中心点；旋转运动
+joint  n. 关节；接缝；接合处，接合点；（牛，羊等的腿）大块肉  adj. 共同的；连接的；联合的，合办的vt. 连接，贴合；接合；使有接头
+disjoint  adj. 互斥；没有共同元素；不相交的
+heuristic  n. 启发式教育法 adj. 启发式的；探索的
+uptime  n. （计算机等的）正常运行时间
+indicator  n. 指标，标志，迹象； 指示器；[试剂] 指示剂；[计] 指示符；压力计
+pending  等待
+arithmetic  n. 算术，算法
+approve  vi. 批准；赞成；满意vt. 批准；赞成；为…提供证据
+subjoin  vt. 增补；附加
+reducing   n. 减低；减轻体重法，减肥法v. 减少（reduce的ing形式）
+suffix  vt. 添后缀 n. 后缀；下标
+enctype 编码方式 编码类型
+ellipsis  n. 省略；省略符号；脱漏
+carousel n. 旋转木马；行李传送带；轮播
+Cascading   n. [电] 级联；串接；阶式渗透v. 瀑布般落下；串联；传递信息（cascade的ing形式）
+clause  n. 条款；[计] 子句n. (Clause)人名；(法)克洛斯
+tidying  整理收拾（tidy的变体）使整齐（tidy的变体）
+poll  n. 投票；民意测验；投票数；投票所adj. 无角的；剪过毛的；修过枝的vt. 投票；剪短；对…进行民意测验；获得选票
+eligible  n. 合格者；适任者；有资格者adj. 合格的，合适的；符合条件的；有资格当选的
+fork  n. 叉；餐叉；耙vt. 叉起；使成叉状 vi. 分叉；分歧
+Retrieving  v. （美）（计算机的）[计] 检索（retrieve的ing形式）；恢复；取回；补偿
+migration  n. 迁移；移民；移动
+broker 代理  n. 经纪人，掮客vt. 以中间人等身分安排...vi. 作为权力经纪人进行谈判
+qualify  vi. 取得资格，有资格vt. 限定，修饰；使具有资格；证明…合格
+poller  n. 轮询者；轮询器
+steam  n. 蒸汽；精力 adj. 蒸汽的vt. 蒸，散发；用蒸汽处理
+tuple  n. [计] 元组，重数
+candidate  n. 候选人，候补者；应试者
+iterable  可迭代的 可迭代对象 迭代器
+poll   n. 投票；民意测验；投票数；投票所adj. 无角的；剪过毛的；修过枝的vt. 投票；剪短；对…进行民意测验；获得选票
+shuffle   n. 洗牌；拖着脚走，曳行；曳步舞，曳步动作；改组；慢切分节奏；随机播放装置v.
+拖着脚走；把脚动来动去；坐立不安；洗牌；把……变换位置；调动；搪塞
+wildcard  n. 通配符
+registry  n. 注册；登记处；挂号处；船舶的国籍
+hierarchical  adj. 分层的；等级体系的
+theme  n. 主题；主旋律；题目adj. 以奇想主题布置的
+Convenience n. 便利；厕所；便利的事物
+Delegate n. 代表 vt. 委派…为代表
+underneath  prep. 在…的下面；在…的形式下；在…的支配下n. 下面；底部adj. 下面的；底层的
+instantiate  v. 例示，举例说明；（哲）有例为证
+capable  adj. 能干的，能胜任的；有才华的
+Eagerly adv. 急切地；渴望地；热心地
+Prototype  n. 原型；标准，模范
+resolve  n. 坚决；决定要做的事vt. 决定；溶解；使…分解；决心要做…vi. 解决；决心；分解
+wrapper n. 包装器 包装材料；[包装] 包装纸；书皮
+populate vt. 填充 居住于；构成人口；移民于；殖民于
+expose  vt. 揭露，揭发；使曝光；显示
+Supplier  n. 供应厂商，供应国；供应者
+Candidate n. 候选人，候补者；应试者
+Enhancer n. [遗] 增强子；强化剂；增加者
+aware adj. 意识到的；知道的；有…方面知识的；懂世故的
+hook n. 挂钩，吊钩vt. 钩住；引上钩vi. 钩住；弯成钩状
+synthetic  n. 合成物adj. 综合的；合成的，人造的
+Disposable adj. 可任意处理的；可自由使用的；用完即可丢弃的  一次性
+Destruction n. 破坏，毁灭；摧毁
+Dereference n. 废弃；解除参照
+predicate n. 谓语，述语adj. 谓语的，述语的v. 使……基于；断言；暗示
+compliant adj. 顺从的；服从的；应允的
+radix n. 根；[数] 基数

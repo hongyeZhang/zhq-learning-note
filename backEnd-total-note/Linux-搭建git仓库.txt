@@ -1,0 +1,22 @@
+================================   建立git仓库  ====================================
+yum –y install git
+
+CentOS 7 安装Git
+服务器端
+1.先从yum安装git
+yum –y install git
+2.在需要的位置创建一个裸仓库（最后以.git结尾）
+cd /usr/local
+mkdir git
+cd git
+git init --bare learngit.git
+3.创建一个git用户并赋予密码
+useradd git
+passwd git   密码更改之后与之前的相同
+4.赋予git用户权限
+chown -R git:git learngit.git
+5.禁用git用户shell登录（一定要禁用）
+vi /etc/passwd
+将git用户修改为如下（一般在最后一行）
+git:x:1000:1000::/home/git:/usr/bin/git-shell
+其他的不用改。服务端完成。

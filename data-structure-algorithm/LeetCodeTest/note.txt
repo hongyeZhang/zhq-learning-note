@@ -1,0 +1,56 @@
+LeetCode 算法学习笔记
+NO 437
+思路介绍：
+（1）包含根节点的时候，总和为sum的路径个数
+（2）不包含根节点的时候，总和为sum的路径个数
+
+二分搜索树中的内容：
+binary search tree
+insert find delete操作
+NO 235
+在一个二叉搜索树中寻找两个节点的最近公共祖先
+思路：
+
+
+chapter8
+递归和回溯法
+
+练习：leetcode NO93 131  47 permutations2
+回溯算法：排列问题
+
+组合问题：NO77 combinations
+练习题
+NO39 combination sum
+以下问题是需要完成的：！！！！
+NO40 combination sum2
+NO216 combination sum3
+NO78 Subsets    要做
+NO90 Subsets2
+NO401 binary watch
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+NO79 word search
+floodfill 算法，本质：深度优先遍历
+NO 200
+练习题(很重要，经典人工智能的基础， 需要做完，本质是搜索算法)
+NO 133  surrounded regions
+NO 417 pacific atlantic water flow
+
+NO 51 N皇后问题  典型的递归、回溯问题
+务必要完成
+N皇后的优化思路
+NO 52 N皇后2
+NO 37 Sudoku Solver 求解数独   很有意思  纯回溯算法就可以解决
+
+
+
+Chapter9
+
+NO198 house robber
+确定状态 和 状态转移
+练习题 NO 213 house robber-ii
+NO 337 house robber-iii
+NO 309
+
+9-5
+0-1背包问题：动态规划最经典的问题

@@ -1,0 +1,29 @@
+version: '3.1'
+services:
+  db:
+    # 目前 latest 版本为 MySQL8.x
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+    ports:
+      - 3306:3306
+    volumes:
+      - ./data:/var/lib/mysql
+  # MySQL 的 Web 客户端
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+
+
+文件名称： docker-compose.yml
+启动命令：守护态启动运行  docker-compose up -d
+交互式进入 docker exec -it tomcat /bin/bash

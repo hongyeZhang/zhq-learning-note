@@ -1,0 +1,12 @@
+(1)linux下安装
+贴链接
+centos7.6
+
+
+(2) 管理界面
+localhost:15672   通过默认账户 guest/guest 登录
+
+
+springcloud 微服务实践  写对应的例子时，需要给用户赋予远程登录的权限
+sudo rabbitmqctl  set_permissions -p / springcloud '.*' '.*' '.*'
+其中springcloud 为用户名

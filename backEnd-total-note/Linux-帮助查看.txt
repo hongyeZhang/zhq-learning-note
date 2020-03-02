@@ -1,0 +1,60 @@
+一、获得命令帮助
+1.1、内部命令与外部命令
+
+简单来说，在linux系统中有存储位置的命令为外部命令；
+
+没有存储位置的为内部命令，可以理解为内部命令嵌入在linux的shell中，所以看不到。
+
+type来判断到底为内部命令还是内部命令
+复制代码
+
+[root@localhost ~]# type help    //查看help命令的内外类型
+help is a shell builtin        //可以看到help为内部命令
+[root@localhost ~]# type passwd    //查看passwd这条命令是否在linux系统中存在
+passwd is /usr/bin/passwd          //可以看到passwd的存储位置，因此存在，为外部命令
+[root@localhost ~]# type cd
+cd is a shell builtin
+//那么passwd即为外部命令，那么cd为内部命令
+
+复制代码
+二、获取帮助的途径
+2.1、help命令　　
+
+内部命令的帮助文档 。使用help的格式为    help  命令字就可以
+
+[root@model Documents]# help cd
+
+ 2.2、"--help"选项
+大多数外部命令都可以使用--help来获取帮助，如果这个命令没有--help选项，则会显示简单的命令 格式   命令字  --help
+date --help     //日期帮助
+
+2.3、man命令
+以全屏显示在线帮助，按q退出,上，下键移动   格式:    man 命令字
+    -输入 ? 键，向前查找，如 ?-h ，将会搜索含有“-h”的行
+    -输入 / 键，向后查找，如 /-k ，将会向后搜索“-k”的行
+    按 N或者n(下一个)来进行上一个下一个相关匹配项查看。
+
+　　6.一般用man查看一个命令的帮助文档的时候，可以通过whatis查看一下该命令在man帮助文档中的入口，一条命令可能有多个man手册页入口（注：在使用whatis的时候如果linux计算机开机70分钟，那么你可以自己随意使用了，如果linux计算机刚刚启动，那么需要执行makewhatis命令来编译一下，否则无法使用whatis命令）
+复制代码
+
+[root@model Documents]# whatis rm
+rm                   (1p)  - remove directory entries
+rm                   (1)  - remove files or directories
+[root@model Documents]# whatis passwd
+passwd               (1)  - update user's authentication tokens
+passwd               (5)  - password file
+passwd [sslpasswd]   (1ssl)  - compute password hashes
+[root@model Documents]#
+
+复制代码
+
+在用man查询rm或者passwd的命令的时候，可以输入：
+
+man 5 passwd        //在入口为文件系统去查询passwd的帮助文档
+man 1 passwd        //在入口为用户指令去查询passwd的帮助文档
+man 1/1p rm
+
+也可以直接写
+
+man rm                 //常用写法
+man passwd

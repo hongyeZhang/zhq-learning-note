@@ -1,0 +1,461 @@
+B站视频
+https://www.bilibili.com/video/av59657634/?p=19
+=========  chapter19  CSS简介
+层叠样式表 (cascading style sheets)
+层次高的覆盖层次低的，Google 对应的浏览器插件。  查看3D视图
+（1）将css样式编写到元素的style属性当中，成为内联样式，只对当前的元素起作用。
+    内联样式不方便代码的复用。
+    内联样式：结构与表现耦合，不方便后期的维护，不推荐使用。
+      <p style="color:red; font-size:"20px";>
+（2）也可以将css样式编写到 head的style标签中。通过css选择器选中指定元素，推荐使用。
+    <style type="text/css">
+        p{
+          color:red;
+          font-size:40px
+        }  (样式的的选择器)
+    </style>
+ （3）外部样式表：将样式表编写到外部的css文件中，通过link标签引入到html中。 style1.css
+      将样式表在不同的页面中使用。最大限度的实现样式的复用，利用浏览器的缓存，加速用户访问速度，提升用户体验。
+      开发中，最推荐使用的方式。
+      <style>
+      <link rel="stylesheet" type="text/css" href="style1.css"/>
+
+=========  chapter22  css的语法
+<style></style> 里面写css代码
+css注释  /* css注释，必须编写在css文件或者style标签里面 */
+css语法：
+    选择器：选中页面中的指定元素，并且将声明块中的样式应用到选择器对应的元素上。
+    声明块：紧跟在选择器后面，使用{}括起来，实际就是一组组的key:value结构，成为声明。
+            一个声明块中，写多个声明，通过；隔开
+        p{
+          color:red;
+          font-size:40px
+        }
+
+=========  chapter23  内联和块元素
+开发工具： DreamWeaver  WebStorm  Hbuilder
+块元素：
+    div:所谓的块元素是独占一行的元素，与元素的宽度无关，都会独占一整行
+    <div> </div>
+    常见的块元素： p h1 h2 h3 ...
+                div 没有任何语义，就是一个纯粹的块元素，不会为里面的元素设置任何的默认样式，主要用于页面的布局。
+内联元素：
+    <span></span>
+    span是一个内联元素（行内元素），指的是指自身大小的元素，不会独占一行
+    常见的内联元素: a img iframe span
+    span也没有任何的寓意，span标签专门用于选中文字，为文字设置样式。
+
+块元素主要用于页面的布局，内联元素主要用于选中文本，设置样式，一般只使用块元素包含内联元素，不会用内联元素包裹块元素
+a元素可以包含任何元素，但是不能再包含<a>元素本身。
+<a href="#">
+    <div>
+
+    </div>
+</a>
+p元素不能包含任何其他的块元素
+H5中不再做区分。
+
+=========  chapter24  常用选择器
+（1）元素选择器：选择页面中的所有指定元素， 标签名{}
+    h1{
+        color:red;
+    }
+
+（2）id选择器：通过元素的id属性值选中唯一的一个元素。 #id{}
+    #idName{
+      font-size:20px;
+    }
+（3）类选择器，通过元素的class属性值选中一组元素。class属性选择器，选择一组元素： .className{}
+    可以同时为一个元素设置多个class属性值，使用空格隔开。
+  .class{
+    color:red;
+  }
+（4）选择器分组（并集选择器）：同时选中多个选择器对应的元素
+      语法：选择器1，选择器2，选择器N{} ，相当于并集的关系
+      #p1, .p2, h1{
+        backfround-color:red;
+      }
+（5）通配选择器：选择页面中的所有元素
+    *{
+      color:red;
+    }
+（6）交集选择器（复合选择器）：为拥有class p3的 span元素设置一个背景为黄色
+    选中同时满足多个选择器的元素
+    对于id选择器，不建议使用复合选择器。
+    语法： 选择器1选择器2选择器N{}
+    span.p3{
+      background-color:yellow;
+    }
+
+=========  chapter25  子元素和后代元素
+父元素：直接包含子元素的元素
+子元素：直接被父元素包含的元素
+祖先元素：直接或间接包含后代元素的元素，父元素也是祖先元素
+后代元素：直接或间接被祖先元素包含的元素，子元素也是后代元素
+兄弟元素：拥有相同父元素的元素叫兄弟元素
+<div>
+    <p><span>我是p标签中的span元素</span></p>
+</div>
+
+（1）为div中的span设置颜色为绿色，后代元素选择器：选中指定元素的指定后代元素
+    元素：祖先元素  后代元素{}
+    div span{
+      color:green;
+    }
+（2）选中id为d1中的div中p元素的span元素，选择器长度越短越好
+    #d1 p span {
+      color: green;
+    }
+（3）为div的子元素span 设置一个背景颜色为黄色
+    子元素选择器：选中父元素的指定子元素： 父元素>子元素
+    div>span{
+      color: green;
+    }
+测试ie浏览器的兼容性问题：ietester
+虚拟机装上对应的软件进行测试即可。
+
+=========  chapter26  选择器练习
+github上的一个练习项目，挺无聊
+
+=========  chapter27  伪类选择器
+<a href="http://www.baidu.com"> </a>
+访问过的链接：默认紫色
+未访问过的链接：默认蓝色
+伪类：专门用来表示元素的一种特殊状态
+      比如访问过的超链接、普通的超链接、获取焦点的文本框，当需要处于特殊状态的元素设置状态时，可以使用伪类选择器。
+a:link 正常链接
+a:visited 访问过的链接
+
+为没访问过的链接（正常的链接）设置颜色为黄色
+    a:link {
+        color:yellow;
+    }
+为访问过的链接设置颜色为黄色
+a:visited {
+  color:red;
+}
+浏览器通过历史记录判断一个链接是否被访问过。由于涉及用户的隐私问题，使用visited伪类只能涉及字体的颜色。
+
+:hover 鼠标移入的状态，比如箭头变小手
+  a:hover{
+    color:blue;
+  }
+:active 超链接被点击的状态
+
+p:hover {
+  background-color:yellow;
+}
+hover active 可以其他元素设置，不仅仅是超链接
+:focus  获取焦点
+<input type="text">
+    input:focus {
+     // 输入框中获取焦点之后修改背景颜色
+      background-color:yellow
+    }
+:selection  为p标签中选中的内容设置样式
+p::selection {
+  background-color:yellow
+}
+
+=========  chapter28  伪元素
+伪元素：表示元素中的一些特殊位置
+为p中的第一个字符设置特殊的样式
+p:first-letter{
+  color:red
+}
+p:first-line{
+  P中第一行设置特殊样式
+}
+:before 表示元素的最前面的部分，一般before结合content样式一起使用
+:after 表示元素的最后边
+p:before{
+  color:red;
+}
+
+=========  chapter29  属性选择器
+<p>我是一个p标签</p>
+title属性：可以给任何标签指定，当鼠标移入到元素上时，元素中的title属性的值将会作为文字提示。
+
+属性选择器：根据元素中的属性和属性值来选择指定元素
+    语法：[属性名] 选取含有指定属性的元素
+          [属性名="属性值"]
+          [属性名^="属性值"] 属性值以指定内容开头的元素
+          [属性名$="属性值"] 属性值以指定内容结尾的元素
+          [属性名*="属性值"] 属性值包含指定内容的元素
+
+    为所有具有title属性的p元素设置北京元素为黄色：
+    p[title]{
+      background-color:yellow
+    }
+
+    为所有title属性为hello的元素设置属性
+    p[title="hello"]{
+      background-color:yellow
+    }
+
+=========  chapter30  子元素的伪类
+:first-child 第一个子元素
+    p:first-child{
+      background-color:red
+    }
+:last-child 最后一个子元素
+    p:last-child{
+      background-color:red
+    }
+:nth-child 选中任意位置的子元素，选择器后面选择第几个元素的参数
+    even：偶数位置    odd：奇数位置的子元素
+    p:nth-child(1){
+      background-color:red
+    }
+<p>我是一个p标签</p>
+:first-of-type
+:last-of-type
+:nth-of-type
+和上述的几种类型相似，type是指当前类型中元素的第几个
+
+=========  chapter31  兄弟元素选择器
+为span后的一个p元素设置背景元素为黄色
+  后一个兄弟元素选择器： 选中一个元素后紧挨着的指定的兄弟元素
+      前一个 + 后一个
+      前一个 ~ 后边所有： 后边的所有兄弟元素
+span + p {
+    background-color:yellow
+}
+
+=========  chapter32  否定伪类
+为所有的p元素设置背景元素为黄色，除了class值为hello的
+语法：
+    :not（选择器）
+p:not(.hello){
+    background-color:yellow;
+}
+
+=========  chapter33  样式的继承
+祖先元素上的样式也会被后代元素所继承。
+利用继承，可以将基本的样式设置给祖先元素，所有的后代元素将会自动继承这些样式。
+并不是所有的样式都会被子元素继承，比如背景相关的样式不会被继承
+查看W3Cschool 查看样式的继承性是yes还是no
+
+=========  chapter34  选择器的优先级
+使用不同的选择器选中同一个元素时，并且设置相同的样式：由选择器的优先级决定显示顺序
+优先级规则：
+    内联样式：优先级 1000
+    id选择器：优先级 100
+    类和伪类：优先级 10
+    元素选择器：优先级 1
+    通配选择器（*）：优先级 0
+    继承的样式：没有优先级
+    当选择器中包含多种选择器时，将选择器中的优先级相加，然后排序，但是选择器的优先级计算不会超过最大的数量级
+    如果选择器的优先级一样，则使用靠后的样式
+    并集选择器：优先级单独计算，不会加到一起计算。
+    当添加 !important 之后样式优先级高于内联优先级，获得最高的优先级，优先于所有的样式显示。但是应该尽量避免使用 !important
+
+=========  chapter35  伪类的顺序
+:link
+:hover
+:visited
+:active
+
+=========  chapter39  长度单位
+px 像素，在网页中使用的最多的一个单位，一个像素相当于屏幕中的一个小点，屏幕是由这些像素点构成的。
+        但是像素点不能被直接看到的。不同的显示器，一个像素的大小也不相同，显示效果越好，像素就越小。
+        分辨率高，像素小。
+百分比%
+    width:50% 父元素的50% ，根据父元素的样式来计算该值。
+    当父元素属性值变化时，子元素也会根据比例发生改变，创建自适应的页面中，经常使用百分比作为单位。
+em
+    与百分比类似，相对于当前元素的字体大小计算
+    font-size=100px, width=10em, 则width = 1000px
+    当使用em时，当字体大小改变时。em也会随之改变，设置字体相关的样式时，经常使用em
+
+=========  chapter36
+RGB值表示颜色
+或者十六进制的rgb值类表示颜色
+语法：#红色绿色蓝色
+rgb(161,187,255)
+background-color : #0000ff;
+截图工具测量颜色: RGB
+
+=========  chapter41 字体1
+字体样式：
+    color
+    font-size: 默认16px作为基准，设置的不是文字本身的大小，而在页面中，每个文字都处在一个看不见的框中，font-size设置的是格的高度
+              一般文字要比格的大小小一些，根据字体的不同，显示效果也不同。
+    font-family：指定文字字体
+字体分类：
+    衬线字体：
+    非衬线字体：
+    等宽字体：
+从参考手册中查看字体有什么可选值
+
+
+
+=========  chapter45  行间距
+<p class="p1"></p>
+css没有直接提供设置行间距的方式，通过行高来间接的设置行间距，类似于单线本，线与线之间的距离就是行高，
+网页中的文字也是也在看不见的线中。文字默认在行高中垂直居中显示。
+line-height:
+.p1{
+  line-height: 40px;
+}
+行间距 = 行高 - 字体大小
+line-height:100%   相对于字体大小计算行高。
+line-height:1; 直接指定数值，行高设置为字体大小的相应倍数，一倍行高。
+
+对于单行文本，可以将行高设置为与父元素高度一致，可以使单行文本在父元素中垂直居中。
+font: 30px/50px, “微软雅黑”   字体/行高，如果不指定，则使用默认值
+
+=========  chapter46  文本样式
+text-transform 文字变形：具体查看用户手册  首字母大写、全部大写、全部小写等等。
+text-decoration: 文本修饰，在文字上、下、中间添加线条 underline overline line-through
+      去除超链接的下划线
+letter-spacing 调整字符间距
+word-spaing 单词间距，设置词与词之间的空格大小
+text-align 文本对齐  left(默认值) right center justify(两端对齐)
+text-indent 首行缩进
+
+=========  chapter47  盒子模型
+框模型 Box model
+css处理网页时，认为美国各元素都包含在一个矩形的盒子里。摆放盒子，完成网页的布局。
+内容区(content)、内边距(padding)、边框(border)、外边距(margin)
+
+内容区：放置子元素的
+内边距：内容区与边框的距离
+外边距：
+
+width:设置盒子内容区的宽度
+height：设置盒子内容区的高度
+<div class="box">
+</div>
+为元素设置边框，需要制定三个样式，缺一不可
+    border-width:宽度
+    border-color:颜色
+    border-style:样式
+    设置边框之后：不会影响内容区的大小。盒子大小 = 内容区 + 内边距 + 边框
+    分别设置边框的宽度：
+        border-width:10px 20px 30px 40px  (上、右、下、左，按照顺时针顺序设置)
+        border-width:10px 20px 30px; 指定三个值（上、左右、下）
+        border-width:10px 20px；指定两个值（上下、左右）
+        border-width:10px； 四个边全部一样
+        以上，适应于盒子模型的所有属性，包括 padding margin
+        还提供了 border-xxx-width 专门设置指定边的宽度
+        border-bottom-width、border-top-width。。。
+        border-color : red yellow orange blue; (顺时针设置规则)
+        border-bottom-color、border-top-color ...
+    边框的样式：
+        none, solid, dotted, dashed, double ...
+
+
+.box{
+  width:100px,
+  height:100px,
+  border-width:10px;
+  border-color:red;
+  border-style:solid;
+}
+
+
+
+=========  chapter49  边框简写属性
+<div class="box">
+</div>
+.box{
+  width:100px,
+  height:100px,
+  border-width:10px;
+  border-color:red;
+  border-style:solid;
+}
+不同浏览器的边框宽度默认值不同，边框的样式默认值为none
+边框的简写样式(同时设置四个边框的样式，而且没有顺序的限制)：
+
+border: 10px red solid;
+border-right: none
+border-xxx:
+    border-top: 10px red solid;
+    border-left: 10px red solid;
+    border-right: 10px red solid;
+    border-bottom: 10px red solid;
+
+=========  chapter45  内边距
+padding:内容区与盒子边框之间的距离
+<div class="box">
+</div>
+
+.box{
+  width: 100px,
+  height: 100px,
+  background-color: #bfa;
+  border: 10px red solid;
+}
+
+.box2{
+  width:100%;
+  height:100%;
+}
+内边距会影响盒子课件框的大小，元素的背景会延伸到内边距。
+子元素会把父元素的内容区沾满，不会占到影响到内边距。
+padding-top : 100px;上内边距
+padding-right
+padding-bottom
+padding-left
+盒子可见框的宽度 = border-left-width + padding-left + width + padding-right + border-right-width
+padding: 100px;
+padding: 100px 200px;
+padding: 100px 200px 300px;
+padding: 100px 200px 300px 400px;
+
+=========  chapter51  外边距
+margin：当前盒子与其他盒子之间的距离，不会影响盒子的可见框大小，会影响到盒子的位置
+margin-top: 上边框与其他盒子之间的距离
+margin-right:
+margin-bottom:
+margin-left:
+由于页面中的元素都是靠左、靠上摆放，设置上和左外边距时，会导致盒子的自身位置发生改变，设置右、下边距，导致其他盒子
+的位置发生变化。
+外边距也可以指定为负值。
+margin:auto 一般只设置给上水平方向的margin，如果只指定一个方向的margin为auto，则会设置为最大值
+垂直方向设置为auto，则外边距默认就是0.
+如果将left和right同时设置为auto，则将两侧的外边距设置为相同的值。即在父元素中居中显示
+简写属性：
+margin：10px 20px 30px 40px  设置与以上的几个属性一致。
+
+=========  chapter52  垂直外边距的重叠
+处置外边距的重叠
+    发生条件：（1）相邻的（2）垂直方向
+    在网页中，垂直方向的相邻外边距会发生重叠，兄弟元素之间的相邻外边距会取最大值而不是取和。
+    如果父子元素的垂直外边距相邻，则子元素的外边距也会设置给父元素
+解决方案：
+    设置padding-top: 1px；挤压里面子元素的位置
+    https://www.bilibili.com/video/av59657634/?p=52
+
+=========  chapter53  浏览器默认样式
+
+
+
+
+
+=========  chapter51  外边距
+
+=========  chapter51  外边距
+
+=========  chapter51  外边距
+
+
+
+
+1、margin:0 auto介绍
+margin:0 auto 设置对象上下间距为0，左右自动。
+可拆分： margin:0 auto 0 auto（上下）
+还可拆分为：margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;
+
+
+
+Overflow-x 是否对内容的左/右边缘进行裁剪。
+Overflow-y 是否对内容的上/下边缘进行裁剪。
+overflow-x:scroll;
+overflow-y:scroll;
+
+
+margin 简写属性在一个声明中设置所有外边距属性。该属性可以有 1 到 4 个值
+padding  内边距

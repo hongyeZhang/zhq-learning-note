@@ -1,0 +1,97 @@
+===============   chapter1  多线程的创建与停止   ===================
+每个线程都有独立运行栈和程序计数器，线程间切换开销小。
+优势：提高CPU利用率、并发执行提高系统性能
+（1）安全性：线程交替无须执行
+JVM调优会对代码进行指令的重排序，实际执行顺序与看到的顺序不一致。
+（2） 活跃性：死锁、饥饿、活锁
+（3）性能问题
+线程之间的调度、数据同步会导致系统整体性能下降，包括服务时间响应过长，吞吐量下降、资源过度消耗。
+具体举例：JVM  JDBC  RPC  定时任务、应用服务器
+线程创建：
+（1）继承thread
+创建thread子类，重写run方法，调用start方法
+（2）实现runnable接口
+实现runnable接口、重写run方法、构造thread、调用start方法。
+（3）future callable
+实现callable接口、重写call方法、构造future task、构造thread、调用start方法
+
+其中后两种的demo
+
+public class MyThread2 {
+    public static void main(String[] args) {
+        System.out.println(Thread.currentThread().getName());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println(Thread.currentThread().getName());
+            }
+        }).start();
+    }
+
+public class MyThread3 {
+    public static void main(String[] args) throws Exception {
+        AtomicInteger counter = new AtomicInteger();
+        FutureTask<Integer> task = new FutureTask(new Callable() {
+            @Override
+            public Object call() throws Exception {
+                return counter.incrementAndGet();
+            }
+        });
+        new Thread(task).start();
+        System.out.println(task.get());
+    }
+}
+
+callbale 可以带有返回值的方法  但是runnable是不可以的
+task.get() 会在主线程中堵塞，直到获得响应结果
+优缺点分析：
+（1）继承thread，代码编写简单，但是由于java单继承模式，无法继承其他父类，扩展性差。
+（2）runnable和callable接口的扩展性强，callable支持返回值
+（3）runnable和callable可以实现多线程之间处理共享资源
+线程的停止：
+（1）thread.stop()方法：
+非安全的停止方法，强制停止，目前已经被废弃
+（2）interrupt方法
+非即时的终止线程，只是设置了一个中断标志，线程在收到标志之后会在合适的时间点停止线程
+（3）使用退出标志
+使用voaltile标志，但是无法快速的终止一个堵塞的线程
+综上所述，应该使用interrupt方法进行线程的停止，对于堵塞还是非堵塞的线程，都可以优雅的进行停止。
+
+
+===============   chapter2  线程状态、优先级、守护线程   ===================
+============== 线程状态
+六种状态：新建NEW、运行RUNNABLE（就绪、运行中）、堵塞BLOCK、定时等待TIMED_WAITING、等待WAITING、停止TERMINATED
+wait() sleep() lockSpport.park()进入等待状态之后，只能由其他线程唤起notify notifyall。
+run() 或者interrupt异常终端信号 执行完毕之后，线程进入终止状态
+书上有线程的状态跳转图。
+synchronized 对象锁，将锁加载对象上
+二者的区别需要注意：
+wait() 方法调用时，释放锁。其他线程可以获得这个锁
+sleep() 当前线程休眠，不会释放锁，其他线程也只能等待
+============== 线程优先级
+优先级1-10设定，1最低，优先级越高，获得CPU时间的可能性越高，每个java版本不同，与操作系统和虚拟机有关
+由调度线程决定哪个线程被执行，默认普通优先级5，在调用start方法之前设置才会起作用
+不能保证优先级高的线程肯定执行
+============== 守护线程
+线程分类：（1）普通（用户）线程 （2）守护线程
+守护线程：在后台提供一种通用的公共服务，保证所有用户对该线程的请求都能有响应。
+eg: JVM垃圾回收  设置方式： thread.setDaemon(true)
+不管守护线程是否运行完毕，只要用户线程运行完毕，程序就会退出。
+
+===============   chapter3  thread详解   ===================
+============== 基本属性
+name:可重复，没有指定会自动生成
+id：线程ID  唯一值，创建线程时指定
+priority：优先级，数值越高优先级越大
+state：线程六种状态
+threadgroup: 线程组，每个线程都属于一个数组，创建时唯一，若创建时没有指定线程数组，则默认属于当前线程数组，看源码可以解释
+线程组是个树形的结构，根节点是system，system包含main
+System -> main -> 我们未明确指定的线程
+设置线程组好处：方便统一管理，线程组可以进行复制，统一进行异常处理，统一进行设置
+threadgroup属于java.lang的内容，不是并发包的，与线程池区别开来
+============== 构造方法
+group：
+target：运行其中的runnable，run()中定义并调用
+推荐定义线程时给定名字
+stacksize：线程的预期栈的大小，默认为0，jvm负责
+最终调用init()方法

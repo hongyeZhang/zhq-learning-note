@@ -1,0 +1,68 @@
+==============  chapter01  简介  =====================
+使用spring生态下所有技术的框架
+四大核心机制：
+（1）起步依赖机制，简化jar包的引用，解决jar版本冲突等
+（2）自动配置。简单配置以搭建整套框架
+（3）springboot cli  命令行
+（4）actuator  程序监控器：监控bean controller 以及程序的健康情况等。
+
+框架构建方式  四种 网站建立项目、cli、手动引入jar包等
+项目结构：
+static：静态资源的默认存放路径
+tempaltes：动态资源的默认存放路径
+application.properties  程序的相关参数配置
+
+==============  chapter02  springboot起步依赖机制  =====================
+降低项目依赖的复杂性，起步依赖的版本是根据springboot的版本确定的
+<exclusions> </exclusions>
+在pom文件中去掉指定的jar包，选择自己喜欢的jar包
+引入自己需要的jar版本，则会自动覆盖springboot的默认依赖版本
+
+==============  chapter03  springboot自动配置  =====================
+是一个程序启动时的过程，决定用哪个配置
+eg： jdbcTempalte的使用
+JdbcTemplateAutoConfiguration   根据datasource 等进行自动配置
+@ConditionalOnClass({ DataSource.class, JdbcTemplate.class })
+@ConfigurationProperties(prefix = "spring.datasource") 将配置文件中的项目注入该类的变量
+可以通过该注释自己写一个配置类，在配置文件中定义相关的配置属性
+
+==============  chapter04  springboot cli  =====================
+没仔细看，待有需要再说
+
+==============  chapter05  actuator  =====================
+在应用程序里提供众多的web端点，了解应用程序运行时的内部状况
+引入对应的maven依赖就可以使用
+dev-tools 启动自动build之后，若pom文件发生改变，则需要手动重启应用才能生效
+management.endpoints.web.exposure.include = *  设置暴露或者隐藏端口
+可以通过端点路径配置  去掉 /actuator 前缀
+/actuator
+/configprops   /info  将要获取的信息  /conditions   /mappings   /httptrace 等重要端口
+/shutdown 端口需要额外配置
+
+==============  chapter06  热部署  =====================
+spring-boot-devtools  热部署，不需要重启
+ pom文件中还需要做对应的设置
+ <optional> 取消传递依赖
+ additional-path  监听的文件夹配置
+ spring.devtools.restart.exclude = 默认不重启目录
+通过更改目录，确定哪些目录的修改能够导致重启，哪些不能
+
+ ==============  chapter07  mybatis集成  =====================
+dependency:
+mybatis-spring-boot-starter
+mysql-connnector-java
+配置：DataSource
+配置映射：mapper:  classpath:mapper/*.xml，可以直接在resources文件下建立对应的目录
+@mapper的映射  定义接口，添加对应的xml文件
+
+ ==============  chapter08  Security集成  =====================
+spring-boot-starter-security
+在启动时默认生成一个user  security  password  作为请求页面接口时的一个密码
+user   UUID
+可以通过属性配置来确定登录的用户名和密码   application.properties
+主要是涉及到权限部分，比较简单的实现，实际不会如视频中一样操作。
+
+ ==============  chapter09  redis集成  =====================
+引入依赖，配置连接参数
+spring-boot-setarter-data-redis
+jedis 客户端， 配置jedis pool 连接池的配置

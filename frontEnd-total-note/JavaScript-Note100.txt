@@ -1,0 +1,109 @@
+===========================  JavaScript  ====================================
+JavaScript 最常用于图片操作、表单验证以及内容动态更新。
+
+
+<button onclick="this.innerHTML=Date()">现在的时间是?</button>
+实例1  字符串相关操作
+<script>
+var txt = "Hello World!";
+document.write("<p>" + txt.length + "</p>");
+var txt="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+document.write("<p>" + txt.length + "</p>");
+</script>
+
+<p id="demo"></p>
+<script>
+var x = "John";              // x是一个字符串
+var y = new String("John");  // y是一个对象
+document.getElementById("demo").innerHTML =typeof x + " " + typeof y;
+</script>
+
+原始值字符串，如 "John", 没有属性和方法(因为他们不是对象)。
+原始值可以使用 JavaScript 的属性和方法，因为 JavaScript 在执行方法和属性时可以把原始值当作对象。
+
+Number() 转换为数字， String() 转换为字符串， Boolean() 转化为布尔值。
+
+查看对象是否为数组
+function isArray(myArray) {
+    return myArray.constructor.toString().indexOf("Array") > -1;
+}
+将日期转化为字符串
+obj = new Date()
+obj.toString()   // 返回 Thu Jul 17 2014 15:38:19 GMT+0200 (W. Europe Daylight Time)
+
+<p>请输出一个 5 到 10 之间的数字:</p>
+
+<input id="demo" type="text">
+<button type="button" onclick="myFunction()">测试输入</button>
+<p id="message"></p>
+
+<script>
+function myFunction() {
+    var message, x;
+    message = document.getElementById("message");
+    message.innerHTML = "";
+    x = document.getElementById("demo").value;
+    try {
+        if(x == "")  throw "值为空";
+        if(isNaN(x)) throw "不是数字";
+        x = Number(x);
+        if(x < 5)    throw "太小";
+        if(x > 10)   throw "太大";
+    }
+    catch(err) {
+        message.innerHTML = "错误: " + err;
+    }
+}
+</script>
+
+
+进行输入数字的验证
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+
+<h1>JavaScript 验证输入</h1>
+
+<p>请输入 1 到 10 之间的数字：</p>
+
+<input id="numb">
+
+<button type="button" onclick="myFunction()">提交</button>
+
+<p id="demo"></p>
+
+<script>
+function myFunction() {
+    var x, text;
+
+    // 获取 id="numb" 的值
+    x = document.getElementById("numb").value;
+
+    // 如果输入的值 x 不是数字或者小于 1 或者大于 10，则提示错误 Not a Number or less than one or greater than 10
+    if (isNaN(x) || x < 1 || x > 10) {
+        text = "输入错误";
+    } else {
+        text = "输入正确";
+    }
+    document.getElementById("demo").innerHTML = text;
+}
+</script>
+
+</body>
+</html>
+
+
+
+JSON数据解析
+var text = '{ "sites" : [' +
+    '{ "name":"Runoob" , "url":"www.runoob.com" },' +
+    '{ "name":"Google" , "url":"www.google.com" },' +
+    '{ "name":"Taobao" , "url":"www.taobao.com" } ]}';
+obj = JSON.parse(text);
+document.getElementById("demo").innerHTML = obj.sites[1].name + " " + obj.sites[1].url;
+
+JSON.parse()	用于将一个 JSON 字符串转换为 JavaScript 对象。
+JSON.stringify()	用于将 JavaScript 值转换为 JSON 字符串。

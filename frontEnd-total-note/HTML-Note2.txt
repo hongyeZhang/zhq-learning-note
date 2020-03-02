@@ -1,0 +1,34 @@
+=====================   html笔记  ===============================
+text 	定义常规文本输入。
+radio 	定义单选按钮输入（选择多个选择之一）
+submit 	定义提交按钮（提交表单）
+
+CSS (Cascading Style Sheets) 用于渲染HTML元素标签的样式.
+CSS 是在 HTML 4 开始使用的,是为了更好的渲染HTML元素而引入的.
+
+CSS 是在 HTML 4 开始使用的,是为了更好的渲染HTML元素而引入的.
+
+CSS 可以通过以下方式添加到HTML中:
+
+内联样式- 在HTML元素中使用"style" 属性
+内部样式表 -在HTML文档头部 <head> 区域使用<style> 元素 来包含CSS
+外部引用 - 使用外部 CSS 文件
+
+HTML <div> 元素是块级元素，它可用于组合其他 HTML 元素的容器。
+
+<div> 元素没有特定的含义。除此之外，由于它属于块级元素，浏览器会在其前后显示折行。
+
+如果与 CSS 一同使用，<div> 元素可用于对大的内容块设置样式属性。
+
+<div> 元素的另一个常见的用途是文档布局。它取代了使用表格定义布局的老式方法。使用 <table> 元素进行文档布局不是表格的正确用法。<table> 元素的作用是显示表格化的数据。
+
+密码表单
+<form action="">
+Username: <input type="text" name="user"><br>
+Password: <input type="password" name="password">
+</form>
+
+
+HTML字符实体
+常用字符实体是不间断空格(&nbsp;)。
+统一资源定位器(Uniform Resource Locators)
