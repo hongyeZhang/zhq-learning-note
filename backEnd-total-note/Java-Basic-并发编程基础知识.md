@@ -1,37 +1,93 @@
 
 # Java并发编程
 
-
 ## Thread 
 
-一般来说，线程包括以下这几个状态：
-`创建(new)、运行(runnable、running)、阻塞(blocked)、超时等待(time waiting)、等待(waiting)、结束（terminated）`
+6 种状态：
 
-    当需要新起一个线程来执行某个子任务时，就创建了一个线程。但是线程创建之后，不会立即进入就绪状态，
-    因为线程的运行需要一些条件（比如内存资源、程序计数器、Java栈、本地方法栈都是线程私有的，所以需要为线程分配一定的内存空间），
-    只有线程运行需要的所有条件满足了，才进入就绪状态。
-    当线程进入就绪状态后，不代表立刻就能获取CPU执行时间，也许此时CPU正在执行其他的事情，因此它要等待。当得到CPU执行时间之后，线程便真正进入运行状态。
-    线程在运行状态过程中，可能有多个原因导致当前线程不继续运行下去，比如用户主动让线程睡眠（睡眠一定的时间之后再重新执行）、用户主动让线程等待，
-    或者被同步块给阻塞，此时就对应着多个状态：
-    time waiting（睡眠或等待一定的事件）、waiting（等待被唤醒）、blocked（阻塞）。当由于突然中断或者子任务执行完毕，线程就会被消亡。
+* 1 NEW	新创建	还未调用 start() 方法；还不是活着的 (alive)
+* 2 RUNNABLE	就绪的	调用了 start() ，此时线程已经准备好被执行，处于就绪队列；是活着的(alive)
+* 2 RUNNING	运行中	线程获得 CPU 资源，正在执行任务；活着的 (与上一种合并了)
+* 3 BLOCKED	阻塞的	线程阻塞于锁或者调用了 sleep；活着的
+* 4 WAITING	等待中	线程由于某种原因等待其他线程；或者的
+* 5 TIME_WAITING	超时等待	与 WAITING 的区别是可以在特定时间后自动返回；活着的
+* 6 TERMINATED	终止	执行完毕或者被其他线程杀死；不是活着的
+
+
 
 ## 方法介绍
 ### sleep()
-    不会释放锁，也就是说如果当前线程持有对某个对象的锁，则即使调用sleep方法，其他线程也无法访问这个对象。
-    如果调用了sleep方法，必须捕获InterruptedException异常或者将该异常向上层抛出。当线程睡眠时间满后，
-    不一定会立即得到执行，因为此时可能CPU正在执行其他的任务。所以说调用sleep方法相当于让线程进入阻塞状态。
+    Thread.sleep() 是一个静态方法：
+    public static native void sleep(long millis) throws InterruptedException;
+    使当前所在线程进入阻塞
+    只是让出 CPU ，并没有释放对象锁，也就是说如果当前线程持有对某个对象的锁，则即使调用sleep方法，其他线程也无法访问这个对象。
+    由于休眠时间结束后不一定会立即被 CPU 调度，因此线程休眠的时间可能大于传入参数
+    如果调用了sleep方法，必须捕获InterruptedException异常或者将该异常向上层抛出。如果被中断会抛出 InterruptedException
+    由于 sleep 是静态方法，它的作用时使当前所在线程阻塞。因此最好在线程内部直接调用 Thread.sleep()，如果你在主线程调用某个线程的 sleep() 方法，其实阻塞的是主线程！
 
 ### yield()
-    调用yield方法会让当前线程交出CPU权限，让CPU去执行其他的线程。它跟sleep方法类似，同样不会释放锁。
+    // 这个方法没啥作用，一般不用
+    Thread. yield() 也是一个静态方法：
+    public static native void yield();
+    “Thread.yield() 表示暂停当前线程，让出 CPU 给优先级与当前线程相同，或者优先级比当前线程更高的就绪状态的线程。
+    它让掉当前线程 CPU 的时间片，使正在运行中的线程重新变成就绪状态，并重新竞争 CPU 的调度权。它可能会获取到，也有可能被其他线程获取到
+    和 sleep() 方法不同的是，它不会进入到阻塞状态，而是进入到就绪状态。
+    yield() 方法只是让当前线程暂停一下，重新进入就绪的线程池中。
+    它跟sleep方法类似，同样不会释放锁。
     但是yield不能控制具体的交出CPU的时间，另外，yield方法只能让拥有相同优先级的线程有获取CPU执行时间的机会。
+```java
+public class YieldTest extends Thread {
+
+    public YieldTest(String name) {
+        super(name);
+    }
+
+    @Override
+    public void run() {
+        for (int i = 1; i <= 100; i++) {
+            System.out.println("" + this.getName() + "-----" + i);
+            if (i == 3 || i == 10 || i == 50 || i == 70 || i == 80 || i == 90) {
+                Thread.yield();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        YieldTest yt1 = new YieldTest("张三");
+        YieldTest yt2 = new YieldTest("李四");
+        yt1.start();
+        yt2.start();
+    }
+}
+
+```
+    
 
 ### stop()
     stop方法已经是一个废弃的方法，它是一个不安全的方法。因为调用stop方法会直接终止run方法的调用，
     并且会抛出一个ThreadDeath错误，如果线程持有某个对象锁的话，会完全释放锁，导致对象状态不一致。所以stop方法基本是不会被用到的。
 
 ### join()
+    Thread.join() 表示线程合并，调用线程会进入阻塞状态，需要等待被调用线程结束后才可以执行。
     作用是：“等待该线程终止”，这里需要理解的就是该线程是指的主线程等待子线程的终止。也就是 在子线程调用了join()方法后面的代码，
     只有等到子线程结束了才能执行
+
+```java
+Thread thread = new Thread(new Runnable() {
+    @Override
+    public void run() {
+        System.out.println("thread is running!");
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+});
+thread.start();
+thread.join();
+System.out.println("main thread ");
+```
 
 ## 启动线程的方法
 **（1） 实现一个runnable接口**
@@ -90,8 +146,6 @@ thread1.start();
 ### notifyAll():
     唤醒所有等待的线程,注意唤醒的是 notify之前 wait的线程,对于notify之后的wait线程是没有效果的。
     调用obj的wait(), notify()方法前，必须获得obj锁，也就是必须写在synchronized(obj){...} 代码段内。
-
-
 
 
 
