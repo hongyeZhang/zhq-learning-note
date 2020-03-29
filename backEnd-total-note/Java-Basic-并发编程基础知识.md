@@ -149,6 +149,11 @@ thread1.start();
 
 
 
+* 挂起：一般是主动的，由系统或程序发出，甚至于辅存中去。（不释放CPU，可能释放内存，放在外存）
+* 阻塞：一般是被动的，在抢占资源中得不到资源，被动的挂起在内存，等待某种资源或信号量（即有了资源）将他唤醒。（释放CPU，不释放内存）
+
+
+
 ## ThreadLocal
     ThreadLocal用于保存某个线程共享变量：对于同一个static ThreadLocal，不同线程只能从中get，set，remove自己的变量，而不会影响其他线程的变量。
     1、ThreadLocal.get: 获取ThreadLocal中当前线程共享变量的值。

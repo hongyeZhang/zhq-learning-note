@@ -176,15 +176,153 @@ config-server:11000
 
 ```
  
- 
  nginx -> zuul
 
 
+zuulServlet  zuul的本质是通过servlet实现的
+zuulController
+HandlerMapping
+
+
+本质是一些过滤器
+
+springMVC
+@requestMapping 精确匹配、正则匹配
+
+
+zuul  1和2两个版本
+springboot2.0 以上才能使用 gateway
+实际使用 zuul1 版本
+
+
+handler 是通过 url 将zuulController 找到
+
+* preRoute() 可以做验证，里面是否有 token 之类的
+* route()
+* postRoute() 数据脱敏，计算执行时间等等 与AOP很像
+
+
+```java
+ZuulFilter 
+String filterType();
+
+int filterOrder();
+
+boolean shouldFilter();
+
+Object run();
+
+```
+
+当一个请求进来时，首先是进入 pre 过滤器，可以做一些鉴权，记录调试日志等操作。之后进入 routing 过滤器进行路由转发，转发可以使用 Apache HttpClient 或者是 Ribbon 。post 过滤器呢则是处理服务响应之后的数据，可以进行一些包装来返回客户端。 error 则是在有异常发生时才会调用，相当于是全局异常拦截器。
 
 
 
 
 
+## Bus 消息总线
+* 在微服务系统架构中，通常会使用消息代理来构建共用的消息主题，由于该主题中产生的消息会被所有实
+  例监听和消费，故称之为消息总线
+
+消息代理在应用程序之间进行消息调度并解耦应用间的依赖。消息代理的场景：
+* 路由消息到一个或者多个目的地
+* 将消息转化为其他表现形式
+* 执行消息聚集、分解，并将结果发送到目的地
+* 调用服务来检索数据
+* 响应时间或错误
+* 使用发布订阅模式来提供内容
+
+主要用于实现微服务之间的通信
+
+接受消息，发送事件
+
+
+
+## Stream 
+* 构建消息总线的基础
+
+* 消息源头 source(output)  
+* 消息接受者 sink(input)
+
+绑定时不知道怎样实现， github 搜索 springcloud 即可
+turbine  zipkin 
+kafka 流处理平台
+
+两个接口  sink  source  相加 = processor
+* 消息聚合
+* 消息分流：设置消息（header）， 消息体body(payload)
+
+MessageBuilder  withHeader  通过设置不同的 header 内容，设置分流的 content
+然后在 streamListener 中设置监听的  condition 来达到分流的目的
+
+
+kafka -> 转换消息服务（比如数据脱敏 IP  ETL等） -> kafka
+
+一个服务既是消费者也是生产者， @transformer
+
+
+spring integration   轻量级的消息代理框架
+
+
+binder : kafka rabbitMq redis 
+
+
+SPI : service provider interface （厂商或者插件） 
+* Dubbo
+* sharding -jdbc
+* atomikos  
+
+通过配置文件的形式加载
+spring SPI 的加载机制： 通过 spring.factories 配置文件
+
+
+
+
+
+## sleuth
+* JVM加载class文件的时候，利用工具将要监控的代码片段植入
+
+* javassist （class method）
+* asm (基于字节码的 cglib)
+
+* java agent （无侵入式监控、热部署） 
+    - java.lang.instrument.Instrumentation
+    
+
+服务端： zipkin 配置服务地址，采样率等
+     - 增加 springcloud sleuth 依赖  zipkin server 依赖 zipkin-ui
+     - 
+
+
+* zipkin1 
+    - http 拦截 
+    - 数据持久
+
+* zipkin2
+
+* 采集 -> 存储 -> 分析挖掘
+* springcloud sleuth -> kafka -> elasticsearch
+
+
+
+* 服务监控框架
+    - pinpoint
+    - skywalking
+    - zipkin
+    - 阿里的鹰眼,美团的CAT
+
+
+## config-server
+
+
+
+
+```properties
+#配置文件存放在本地的情况
+#注意：文件夹要有访问权限
+spring.profiles.active=native
+spring.cloud.config.server.native.search-locations=C:/IdeaProjets/demo_configs/
+```
 
 
 
