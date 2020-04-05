@@ -46,42 +46,60 @@
     - DefaultListableBeanFactory是Bean加载的最核心部分，也是Spring注册及管理加载Bean的默认实现。
     DefaultListableBeanFactory继承自AbstractAutowireCapableBeanFactory并实现了ConfigurableListableBeanFactory以及BeanDefinitionRegistry接口。
 
+    <img src="E:\GIT_ZHQ\zhq-learning-note\interview-material\笔记图片\DefaultListableBeanFactory.png" alt="DefaultListableBeanFactory" style="zoom:100%;" />
+    
 * AutowireCapableBeanFactory
-    - 自动装配，解析依赖
-
+  
+- 自动装配，解析依赖
+  
 * 作用域
     - singleton
     - prototype
 
 * AliasRegistry
+  
      - 定义对alias的简单增删改查等操作
 * BeanDefinitionRegistry
+  
      - 向注册表中注册 BeanDefinition 实例，完成注册程
 * SimpleAliasRegistry
+  
      - 主要使用map作为alias的缓存，并对接口AliasRegistry进行实现
 * SingletonBeanRegistry
+  
      - 定义对单例的注册及获取
 * BeanFactory
+  
      - 定义获取Bean及各种属性
 * DefaultSingletonBeanRegistry
+  
      - 对接口SingletonBeanRegistry各函数的实现
 * ListableBeanFactory
+  
      - 根据各种条件获取Bean的列表
 * HierarchicalBeanFactory
+  
      - 继承BeanFactory，也就是在BeanFactory定义的功能的基础上增加了对parent BeanFactory的支持
 * FactoryBeanRegistrySupport
+  
      - 在DefaultSingletonBeanRegistry的基础上增加了对FactoryBean的处理功能
 * ConfigurableBeanFactory
+  
      - 提供配置Factory的各种方法
 * AutowireCapableBeanFactory
+  
      - 提供创建Bean、自动注入，初始化以及应用Bean的后处理器
 * AbstractBeanFactory
+  
      - FactoryBeanRegistrySupport和ConfigurableBeanFactory功能的集合
 * AbstractAutowireCapableBeanFactory
+  
      - 综合AbstractBeanFactory并对接口AutowireCapableBeanFactory进行实现
 * ConfigurableListableBeanFactory
+  
      - BeanFactory配置清单，指定忽略类型及接口等
 * DefaultListableBeanFactory
+  
     - 综合上面所有的功能
 
 
@@ -104,7 +122,7 @@ Spring IoC容器管理一个或多个Bean。这些Bean是根据程序提供给�
     ● 用于声明Bean在容器中的行为信息（作用域，生命周期回调等）。
     ● 要完成自身工作需要引用其他的Bean，这些引用也称为依赖项。
     ● 要在新创建的对象中设置的其他配置，如：用于管理连接池的连接数，或池的大小限制。
-    
+  
     这些元数据构成每个BeanDefinition的一组属性：
     ● class
     ● name：Bean在容器内的唯一标识符。基于XML的配置，可以使用id或name属来指定Bean标识符
@@ -115,7 +133,7 @@ Spring IoC容器管理一个或多个Bean。这些Bean是根据程序提供给�
     ● lazy-initialization mode：延迟加载方法
     ● initialization method：初始化方法
     ● destruction method：销毁方法
-    
+  
     BeanDefinition继承了AttributeAccessor和BeanMetadataElement接口：
     ● AttributeAccessor：提供了访问属性的能力
     ● BeanMetadataElement：用来获取元数据元素的配置源对象
@@ -191,6 +209,262 @@ protected String resolvePath(String path) {
 
 
 ### Spring 启动流程
+* Spring的IoC容器在实现控制反转和依赖注入的过程中，可以划分为两个阶段：
+    - 容器启动阶段
+    - Bean实例化阶段
+
+
+
+![spring启动流程](E:\GIT_ZHQ\zhq-learning-note\interview-material\笔记图片\spring启动流程.png)
+
+
+* AbstractApplicationContext
+```java
+	@Override
+	public void refresh() throws BeansException, IllegalStateException {
+		synchronized (this.startupShutdownMonitor) {
+			// Prepare this context for refreshing.
+			prepareRefresh();
+
+			// Tell the subclass to refresh the internal bean factory.
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+			// Prepare the bean factory for use in this context.
+			prepareBeanFactory(beanFactory);
+
+			try {
+				// Allows post-processing of the bean factory in context subclasses.
+				postProcessBeanFactory(beanFactory);
+
+				// Invoke factory processors registered as beans in the context.
+				invokeBeanFactoryPostProcessors(beanFactory);
+
+				// Register bean processors that intercept bean creation.
+				registerBeanPostProcessors(beanFactory);
+
+				// Initialize message source for this context.
+				initMessageSource();
+
+				// Initialize event multicaster for this context.
+				initApplicationEventMulticaster();
+
+				// Initialize other special beans in specific context subclasses.
+				onRefresh();
+
+				// Check for listener beans and register them.
+				registerListeners();
+
+				// Instantiate all remaining (non-lazy-init) singletons.
+				finishBeanFactoryInitialization(beanFactory);
+
+				// Last step: publish corresponding event.
+				finishRefresh();
+			}
+
+			catch (BeansException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Exception encountered during context initialization - " +
+							"cancelling refresh attempt: " + ex);
+				}
+
+				// Destroy already created singletons to avoid dangling resources.
+				destroyBeans();
+
+				// Reset 'active' flag.
+				cancelRefresh(ex);
+
+				// Propagate exception to caller.
+				throw ex;
+			}
+
+			finally {
+				// Reset common introspection caches in Spring's core, since we
+				// might not ever need metadata for singleton beans anymore...
+				resetCommonCaches();
+			}
+		}
+	}
+```
+
+* 整个refresh()的代码都是同步的，而对应的同步对象是startupShutdownMonitor。startupShutdownMonitor只在refresh()和close
+()两个方法里被用到，而它是用来同步applicationContext的刷新和销毁。
+
+
+
+* DefaultBeanDefinitionDocumentReader
+
+
+
+#### 第三步 准备BeanFactory
+这个阶段主要是当Spring获取了BeanFactory之后，还要做些处理工作（配置工厂的上下文），如：上下文的ClassLoader和BeanPostProcessor。
+
+
+BeanExpressionResolver
+通过将值作为表达式进行评估来解析值。它的唯一实现类是StandardBeanExpressionResolver。
+PropertyEditor
+Spring使用PropertyEditor的来实现对象和字符串之间的转换。有时用与对象本身不同的方式表示属性可能更为方便。如：“2019-09-13”字符串形式阅读起来更友好，但也可以将任何方便阅读的日期表现形式转换为日期对象。
+Spring提供了很多内置的PropertyEditor，它们都位于org.springframework.beans.propertyeditors包中。默认情况下，大多数由BeanWrapperImpl注册。
+
+Aware感知
+如果在某个Bean里面想要使用Spring框架提供的功能，可以通过Aware接口来实现。通过实现 Aware 接口，Spring 可以在启动时，调用接口定义的方法，
+并将 Spring 底层的一些组件注入到自定义的 Bean 中。
+
+ApplicationContextAware  当ApplicationContext创建实现ApplicationContextAware接口的Bean实例时，将为该Bean实例提供对该ApplicationContext的引用。
+ApplicationEventPublisherAware  为Bean实例提供对ApplicationEventPublisherAware的引用。
+BeanFactoryAware  为Bean实例提供对BeanFactory的引用
+BeanNameAware  获取Bean在BeanFactory中配置的名字
+MessageSourceAware  为Bean实例提供对MessageSource的引用
+EnvironmentAware  获得Environment支持，这样可以获取环境变量
+ResourceLoaderAware  获得资源加载器以获得外部资源文件
+BeanPostProcessor  如果想在Spring容器中完成Bean实例化、配置以及其他初始化方法前后要添加一些自己逻辑处理，就需要定义一个或多个BeanPostProcessor接口实现类，然后注册到Spring IoC容器中。
+
+
+#### 第四步  BeanFactory后处理
+
+
+
+* bean 的作用域
+    - singleton （默认注册）
+    - prototype （默认注册）
+    - request 
+    - session
+    - globalSession
+    - application
+
+
+* WebApplicationContextUtils
+    - 该类位于包`org.springframework.web.context.support`是一个使检索指定ServletContext的根WebApplicationContext的便捷工具类。它如下工具方法：
+    - 1. 在Web容器启动过程中注册Web相关作用域Bean（request/session/globalSession/application）
+    - 2. 在Web容器启动过程中注册相应类型的工厂Bean ，依赖注入的Bean时能访问到正确的对象（ServletRequest/ServletResponse/HttpSession/WebRequest）
+    - 3. 在Web容器启动过程中注册Web相关环境Bean
+    - 4. 在Web容器启动过程中初始化Servlet propertySources
+    - 5. 在客户化Web视图或者MVC action中，使用该工具类可以很方便地在程序中访问Spring应用上下文(application context)。
+
+
+
+
+#### 第五步  调用后处理器
+
+* BeanFactoryPostProcessor
+    - BeanFactoryPostProcessor接口与BeanPostProcessor相似，但有一个主要区别：BeanFactoryPostProcessor用来操作Bean
+      的配置元数据。也就是说，Spring IoC容器允许BeanFactoryPostProcessor读取配置元数据，并能在容器实例化任何Bean之前更改这些元数据。
+      换句话说 ：就是可以让我们随心所欲地修改BeanFactory内所有BeanDefinition定义数据。
+    - 可以在项目中配置多个BeanFactoryPostProcessor，同时通过设置Order属性来控制这些BeanFactoryPostProcessor的执行顺序，
+      当然仅当BeanFactoryPostProcessor实现Ordered接口时，才可以设置此属性。
+
+
+* BeanDefinitionRegistryPostProcessor  
+    - 是对标准BeanFactoryPostProcessor的扩展，允许在进行常规BeanFactoryPostProcessor检测之前注册其他Bean
+       定义。特别是，BeanDefinitionRegistryPostProcessor注册的Bean定义又定义了BeanFactoryPostProcessor实例。
+
+
+
+
+
+#### 第六步  注册后处理器
+
+* 实例化和初始化是不是一回事？
+    - instantiation 实例化
+    - Initialization 初始化
+    - BeanPostProcessor 在 bean 实例化之后，执行初始化的相关操作
+        - postProcessBeforeInitialization
+        - postProcessAfterInitialization 
+        - AOP 自动代理相关
+    - InstantiationAwareBeanPostProcessor
+        - postProcessBeforeInstantiation
+        - postProcessAfterInstantiation
+
+
+
+* 实例化是在什么时候进行的？
+
+
+* Spring Bean的生命周期只有四个阶段：
+    - 1. 实例化（Instantiation）：调用构造函数
+    - 2. 属性赋值（Populate）：设置依赖注入
+    - 3. 初始化（Initialization）：调用 init 方法
+    - 4. 销毁（Destruction）：调用 destory 方法
+
+![bean的生命周期](E:\GIT_ZHQ\zhq-learning-note\interview-material\笔记图片\bean的生命周期.png)
+
+
+生命周期也可以理解为四个等级。每个等级中都用有相应的接口，实现其中某个接口或者将实现类注入到Spring容器，容器就会在相应的时机调用其方法。
+1. 工厂级处理器接口
+2. 容器级生命周期接口
+3. Bean级生命周期接口
+4. Bean本身方法
+
+
+    BeanFactoryPostProcessor
+    工厂后处理器接口
+    容器创建完毕，装配Bean源后立即调用
+    
+    InstantiationAwareBeanPostProcessor
+    容器后处理器接口
+    分别在调用构造之前，注入属性之前，实例化完成时调用
+    
+    BeanPostProcessor
+    容器后处理器接口
+    分别在Bean的初始化方法调用前后执行
+    
+    BeanNameAware
+    Bean级后置处理器接口
+    注入属性后调用
+    
+    BeanFactoryAware
+    Bean级后置处理器接口
+    注入属性后调用
+    
+    InitializingBean
+    Bean级后置处理器接口
+    在类本身的初始化方法之前调用其方法（本身也是初始化方法）
+    
+    DisposableBean
+    Bean级后置处理器接口
+    在类本身的销毁方法执行之前调用其方法（本身也是销毁方法）
+    
+    init方法
+    Bean本身方法
+    在注入属性之后调用初始化方法
+    
+    destroy方法
+    Bean本身方法
+    在关闭容器的时候进行销毁
+
+
+
+Spring Bean的生命周期：
+    - 1. Spring对Bean进行实例化，调用Bean的构造参数
+        - 2. 设置对象属性，调用Bean的set方法，将属性注入到bean的属性中
+    - 3. 检查Bean是否实现BeanNameAware、BeanFactoryAware、ApplicationContextAware接口，如果实现了这几个接口Spring会分别调用其中实现的方法。
+    - 4. 如果Bean是否实现BeanPostProcessor接口，Spring会在初始化方法的前后分别调用postProcessBeforeInitialization和postProcessAfterInitialization方法
+    - 5. 如果Bean是否实现InitalizingBean接口，将调用afterPropertiesSet()方法
+    - 6. 如果Bean声明初始化方法，也会被调用
+    - 7. 使用Bean。Bean将会一直保留在应用的上下文中，直到该应用上下文被销毁。
+    - 8. 检查Bean是否实现DisposableBean接口，Spring会调用它们的destory方法
+    - 9. 如果Bean声明销毁方法，该方法也会被调用
+
+![bean的声明周期2](E:\GIT_ZHQ\zhq-learning-note\interview-material\笔记图片\bean的声明周期2.png)
+
+
+
+
+
+
+* 怎样解决循环依赖问题？
+    - Spring单例构造器循环依赖
+        - 目前Spring是无法解决的
+    - Field循环依赖
+        - 通过提前暴露实例化Bean及缓存不同阶段的bean(三级缓存)进行依赖排除
+
+
+
+
+
+
+
+
+
 
 
 
