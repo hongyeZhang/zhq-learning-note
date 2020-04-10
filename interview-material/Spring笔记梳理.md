@@ -448,15 +448,41 @@ Spring Bean的生命周期：
 
 
 
+* Bean的创建过程
+
+
+
+
+
+
 
 
 
 * 怎样解决循环依赖问题？
+    - Spring循环依赖的理论依据其实是Java基于引用传递，当我们获取到对象的引用时，对象的field或者或属性是可以延后设置的。
     - Spring单例构造器循环依赖
         - 目前Spring是无法解决的
-    - Field循环依赖
-        - 通过提前暴露实例化Bean及缓存不同阶段的bean(三级缓存)进行依赖排除
+    - Field 循环依赖
+        - 提前暴露实例化Bean + 缓存不同阶段的bean(三级缓存)进行依赖排除
+        - Spring首先从singletonObjects（一级缓存）中尝试获取，如果获取不到并且对象在创建中，则尝试从earlySingletonObjects(二级缓存)
+           中获取，如果还是获取不到并且允许从singletonFactories通过getObject获取，则通过三级缓存获取，即通过singletonFactory.getObject()。
+           如果获取到了，将其存入二级缓存，并清除三级缓存。
+        - 如果缓存中没有bean对象，那么Spring会创建Bean对象，将实例化的bean提前曝光，并且加入缓存中。
+          
 
+```java
+/** Cache of singleton objects: bean name --> bean instance */
+// 一级缓存：维护着所有创建完成的Bean
+private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>(256);
+
+/** Cache of early singleton objects: bean name --> bean instance */
+// 二级缓存：维护早期暴露的Bean(只进行了实例化，并未进行属性注入)
+private final Map<String, Object> earlySingletonObjects = new HashMap<String, Object>(16);
+
+/** Cache of singleton factories: bean name --> ObjectFactory */
+// 三级缓存：维护创建中Bean的ObjectFactory(解决循环依赖的关键)
+private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>(16);
+```
 
 
 
@@ -485,6 +511,52 @@ Spring Bean的生命周期：
 
 
 ### Spring MVC
+#### SpringMVC 的运行流程
+* 从 URL 到 method 的过程是怎样做到的？
+
+* DispatcherServlet 匹配所有的请求
+* doGet()
+    - doService()
+        - doDispatch(request, response)
+            - HandlerExecutionChain mappedHandler = getHandler(processedRequest)
+            - HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+            - RequestMappingHandlerAdapter
+            - 
+
+* doDispatch 主要流程
+    - 1.调用handlerMapping获取handlerChain
+    - 2.获取支持该handler解析的HandlerAdapter
+    - 3.使用HandlerAdapter完成handler处理
+    - 4.视图处理(页面渲染)
+
+* HandleMapping
+    - 子类 RequestMappingHandlerMapping
+    - 定义: 请求路径-处理过程映射管理
+    - 打个比方就是根据你的http请求的路径得到可以处理的handler(你的Controller方法)
+
+* HandleAdapter
+    - 定义: 根据 HandlerMapping.getHandler()得到的Handler信息,对http请求参数解析并绑定
+    - 根据HandlerMethod信息,对http请求进行参数解析,并完成调用
+
+
+* request请求过程
+    - 调用doDispatch()
+    - 遍历handlerMappings 与request 获取一个执行链 getHandl er()
+    - 遍历handleAdapters 与 handle 获取一个handle 适配器 RequestMappingHandlerAdapter 记性参数解析并完成调用
+    - 通过执行链去调用拦截器当中的 preHandle() 方法 ，进行预处理。
+    - 基于handle 适配器 去调用handle 方法,返回 modelAndView
+    - 通过执行链 去调用拦截器当中的 PostHandle() 方法 ，进行拦截处理。
+    - processDispatchResult()
+    - 正常：调用render()进行视图解析
+        - 1 基于 遍历 viewResol vers 工与 viewname 获取View
+        - 2 调用view.render() 进行视图解析和返回,设置model 至request
+    - 异常：遍历handlerExceptionResolvers 调用resolveExcepti on(),返回 mv,最后跳转至异常 mv
+
+#### SpringMVC 源码分析
+
+
+
+
 
 
 ### 其他
