@@ -9,6 +9,13 @@
 
 
 
+## InnoDB
+* 默认的事务隔离级别  READ REPEATABLE
+
+
+
+
+
 ## Sql执行顺序
 
 ```
