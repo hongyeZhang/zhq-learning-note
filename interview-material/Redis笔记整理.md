@@ -233,6 +233,10 @@ min-slaves-max-lag 10
 何为正常复制，何为异常复制？这个就是由第二个参数控制的，它的单位是秒，表示如果 10s 没有收到从节点的反馈，就意味着从节点同步不正常，要么网络断开了，要么一直没有给反馈。
 
 
+* 监控
+* 选主
+
+
 ### Codis
 * 充当代理的功能，维护1024个槽位，不同的槽位对应不同的redis实例
 * 结合 zookeeper, codis 也可以做集群处理，做到高可用。
@@ -368,6 +372,16 @@ epoll与select/poll的区别
 * 注意设置超时时间
 
 
+### ZSet
+* ZADD key score1 member1 [score2 member2]
+* https://www.runoob.com/redis/redis-sorted-sets.html
+
+
+
+
+
+
+
 
 
 ### 相关面试题
@@ -379,3 +393,22 @@ epoll与select/poll的区别
         - 集合的数据，提前 hash 拆分
 
 
+* 单机限流
+    -  Java单机限流可以使用AtomicInteger，RateLimiter或Semaphore来实现
+
+* 分布式限流
+    - Redis 4.0 提供了一个限流 Redis 模块，它叫 redis-cell。该模块也使用了漏斗算法，并提供了原子的限流指令
+    - redis + lua 脚本，自己写，主要应用 guava 的 RateLimiter 的思想
+
+* 设计延时队列
+    - PriorityQueue 定时线程轮询
+    - Zset 定时线程轮询
+
+* Redis设计延迟队列：
+    - Redis的有序集合天然支持这种场景，
+    - $redis -> zAdd('notify_msg_queue', '1553053550', '1553053550-1234567891-0');//值：当前时间戳-订单号-通知次数
+    - $redis -> zRangeByScore('notify_msg_queue', 0, '1553053550');//排序因子用时间戳，这样能去除之前到现在的所有数据
+    - $redis -> zRem('notify_msg_queue', '1553053550-1234567891-0')；//指定删除对应的值
+    - 设计原理：队列名字为：notify_msg_queue，因子为当前时间戳，值为【当前时间戳-订单号-通知次数】，获取的时候
+    - 如果通过zRangeByScore拿到对应的值能后处理值，根据 “-”符号分割值，如果时间戳 <= ，能后根据订单好通知业务方
+    - 的通知接口，如果通知成功则zRem删除对应值从消息队列中移除，如果通知是吧删除原来的值，重新赋新值入消息队列：历史时间戳+4分钟（若都是败就依次增加：4m,10m,10m,1h,2h,6h,15h，知道15h后）
