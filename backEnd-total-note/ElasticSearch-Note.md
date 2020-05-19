@@ -294,3 +294,47 @@ Header
 
 
 
+
+# ElasticSearch 云析学院
+## 5.6版本
+
+* 作用领域
+    - 日志、电商、blog
+    - 分布式调用链路追踪
+    - 降价提醒、业务智能分析
+* 基本概念
+    - 集群
+    - 节点    
+    - ZenDiscovery 自动发现 命名服务
+    - 分片 shared
+    - 副本 replicas
+    - types 
+    - mappings
+    - query DSL
+    - 近实时搜索
+    - 持久化更新
+* 磁头
+    - 悬浮
+    - 冲停
+
+### 版本：5.6.16
+refresh
+flush
+fsync
+
+默认分区策略：  5个分片  一个副本
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+

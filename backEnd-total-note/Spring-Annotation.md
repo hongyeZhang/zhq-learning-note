@@ -4,7 +4,6 @@
 
 
 ### @RequestMapping
-@RequestMapping 中method的默认值是什么?
 
 没有默认值，如果不配置method，
 则以任何请求形式
