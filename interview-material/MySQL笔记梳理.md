@@ -13,6 +13,15 @@
 * 默认的事务隔离级别  READ REPEATABLE
 
 
+## 解决深分页问题
+找到满足条件的100条记录，并记下下一次查询应该开始的位置，以便于下一次查询能直接从该位置 开始，这样就不必每次 查询都先从整个表中先找到满足条件的前M条记录，
+舍弃，在从M+1开始再找到100条满足条件的记录了。
+通过子查询来解决深分页产生的性能问题
+
+select id,title from collect where id>=(select id from collect order by id limit 90000,1) limit 10;
+
+
+
 
 
 
