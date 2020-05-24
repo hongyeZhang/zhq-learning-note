@@ -13,17 +13,50 @@ git checkout -- <fileName> 从暂存中撤销修改
 
 ```
 
-### git reset
+
+### git pull
 ```
+git pull /projects/first-steps-clone master  
+
+```
+
+
+### git reset
+重置暂存区
+```
+git reset HEAD foo.txt 将文件重置为当前HEAD版本
+
+
+
+
+
 git reset --hard HEAD^        回退到上一版本
 git reset --hard HEAD~100
 git reset --hard [commitId]   回到未来的某个版本,其中commitId不需要写全
 git reset HEAD [fileName]     把暂存区的修改回退到工作区。当我们用HEAD时，表示最新的版本
 ```
 
+
+### git status 
+```
+git status
+git status --short  查看状态
+
+
+```
+
+
 ### git log
 
 ```
+git log -n 3 最近的3次提交
+git log --oneline 单行
+git log --stat
+git log --shortstat --oneline  --shortstat 则用来显示项目中有多少文件被修改，以及新增或删除了多少文件。
+git log --graph --oneline
+
+
+
 git rev-parse HEAD :                查询git log 的第一个 log 的 commit id
 git rev-parse --short HEAD :        --short 可以获得较短的commit id
 git rev-parse --abbrev-ref HEAD     提取出当前的 git 分支名称
@@ -40,6 +73,15 @@ git log --oneline -10  查询最近10次的提交记录
 
 
 ```
+
+### git diff
+
+```
+git diff <fileName>  显示文件被修改的行
+
+```
+
+
 
 
 
@@ -104,6 +146,9 @@ git stash save -u/-a
 ```$xslt
 git tag <tagName> 标签默认打在最新提交的commit上，如果中途忘记打，则可以查看提交历史
 git log --pretty=oneline --abbrev-commit  找到对应的Id
+git log --oneline -10  单行的形式显示10条记录
+git log --graph 日志的图形化版本
+
 git tag <tagName> <commitId>
 git tag -a <tagName> -m "description" <commitId>   创建带有说明的标签
 推动标签到远程   git push origin <tagname>
