@@ -421,6 +421,8 @@ alter table index1 add index index1_name(name(10));
 drop index <indexName> on <tableName>
 
 
+# 展示表的索引
+show index from employees.employees;
 
 ```
 
