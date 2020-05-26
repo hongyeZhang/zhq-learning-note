@@ -38,3 +38,19 @@ ChannelHandlerContext 的 主要功能是要能是管理关联的ChannelHandler 
 
 ## 第二部分  编解码器
 
+
+
+* 安全协议
+    * SSL
+    * TLS
+    
+## 第三部分  网络协议
+
+
+### 实战
+* netcat
+
+
+
+
+
