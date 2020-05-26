@@ -1,15 +1,12 @@
-# 《Elasticsearch 实战》
+# Elasticsearch 学习笔记
 
-## chapter1
+## chapter1 概述
 
 默认不允许root用户运行
 ./elasticsearch -Des.insecure.allow.root=true
 
 vim /etc/sysctl.conf
-
-
  chown -R zhq:zhq elasticsearch-5.6.16
- 
  chown -R zhq:zhq elasticsearch-6.8.6
  
 ```shell script
@@ -30,61 +27,126 @@ sysctl -a|grep vm.max_map_count
 #永久设置 在 /etc/sysctl.conf文件最后添加一行
 # vm.max_map_count=262144
 
+```
 
+## chapter2 Rest API
+
+### 索引操作
+* 索引命令规约： rest命令/索引库/类型/id
+
+#### 创建
+* 一般来说，分片数量等于机器的节点，但是不能过度分片，评估机器的单点处理能力
+* 经验公式  节点数量 = 分片数量 * （副本数量+1）
+
+```shell script
+# 查看所有的索引目录
+curl -XGET http://localhost:9200/_cat/indices
+curl -XGET http://localhost:9200/_cat/indices?v
+# 创建facebook的索引  pretty方便查看结果
+curl -XPUT http://localhost:9200/facebook?pretty 
+# 查看创建的索引
+curl -XGET http://localhost:9200/facebook?pretty
+
+# 创建指定参数（分片和副本数）的索引
+curl -XPUT -H "Content-Type: application/json" http://localhost:9200/facebook01?pretty -d '
+{
+    "settings": {
+      "index":{
+        "number_of_shards": 3,
+        "number_of_replicas": 2
+      }
+    }
+}'
 
 ```
 
-
-### 索引操作
+#### 查询
 ```shell script
+# 查看索引设置
+curl -XGET http://localhost:9200/facebook01/_settings?pretty
+curl -XGET http://localhost:9200/facebook01/_mapping?pretty
+# 支持通配符查询
+curl -XGET http://localhost:9200/face*?pretty
+#所有的索引
+curl -XGET http://localhost:9200/_all?pretty
 
-curl -XGET http://localhost:9200/_cat/indices
-
-# 创建facebook的索引  pretty 方便查看结果的
-curl -XPUT http://localhost:9200/facebook?pretty   
-
-curl -XGET http://localhost:9200/facebook?pretty
-curl -XGET http://localhost:9200/facebook/_settings
-
+#测试失败
 curl -XGET http://localhost:9200/facebook01/_settings,_mapping?pretty
 
-#判断是否存在
-curl -XHEADER http://localhost:9200/facebook
+```
 
+#### 判断是否存在
 
-#索引下线
-curl -XPOST http://localhost:9200/facebook/_close
-curl -XPOST http://localhost:9200/facebook/_open
+```shell script
+#判断是否存在 测试失败
+curl -X HEADER http://localhost:9200/facebook01
 
-curl -XPUT http://localhost:9200/facebook/external/1?pretty -d '{ "name": "Natsu"}'
+```
 
+#### 删除
 
+```shell script
 #索引删除
-curl -XDELETE http://localhost:9200/facebook?pretty
-
+curl -XDELETE http://localhost:9200/facebook01?pretty
 curl -XGET http://localhost:9200/_cat/indices?v
+```
 
-# 索引收缩
-curl -XPUT http://localhost:9200/customer?pretty
-$ curl -XPOST http://localhost:9200/customer/_shrink/customer01 -d '
+
+#### 打开和关闭
+```shell script
+#索引关闭之后里面的数据查不到
+curl -X POST http://localhost:9200/facebook01/_close?pretty
+
+#打开索引
+curl -X POST http://localhost:9200/facebook01/_open?pretty
+
+#当索引关闭时 此操作会失效
+curl -XPUT -H "Content-Type: application/json" http://localhost:9200/facebook01/external/1?pretty -d '
 {
-"settings": {
-"index.number_of_shards": 1,
-"index.number_of_replicas": 1,
-"index.codec": "best_compression"
-}
+    "name": "Natsu"
 }'
 
+curl -XGET http://localhost:9200/facebook01?pretty
+curl -XGET http://localhost:9200/facebook01/external/1?pretty
+```
 
-# 先设置原索引为read-only
-curl -XPUT http://localhost:9200/customer/_settings -d '{
+
+
+#### 收缩
+* 收缩API使您可以使用较少的分片将现有索引收缩为新索引。缩小的数量必须为原数量的因子（即原分片数量是新分片倍数），例如8个分片可以缩小到4、2、1个分片。
+    如果原分片数量为素数则只能缩小到一个分片。在缩小开始时，每个收缩的复制都必须在同一节点（node）存在。
+* 索引收缩的必要条件
+    - 目标索引存在
+    - 原索引主分片数量比目标索引多
+    - 原索引主分片数量是目标索引倍数
+    - 索引中的所有文档在目标索引将会被缩小到一个分片的数量不会超过 2,147,483,519 ，因为这是一个分片的承受的最大文档数量。
+    - 处理收缩过程的节点必须具有足够的可用磁盘空间，以容纳现有索引的第二个副本
+
+```shell script
+curl -XPUT http://localhost:9200/customer?pretty
+curl -XPUT -H "Content-Type: application/json" http://localhost:9200/customer?pretty -d '
+{
+    "settings": {
+      "index":{
+        "number_of_shards": 5,
+        "number_of_replicas": 1
+      }
+    }
+}'
+curl -XGET http://localhost:9200/_cat/indices?v
+
+# 索引收缩，收缩到新的索引上，收缩的数量必须是原来数量的因子
+# 目标索引必须存在，收缩的节点必须有足够的空间，容纳新的副本
+
+# step1: 原索引为 read-only
+curl -XPUT -H "Content-Type: application/json" http://localhost:9200/customer/_settings -d '{
     "settings": {
         "index.blocks.write": true
     }
 }'
 
-# 然后开始收缩索引
-$ curl -XPOST http://localhost:9200/customer/_shrink/customer01 -d '
+# step2: 然后开始收缩索引
+curl -XPOST -H "Content-Type: application/json" http://localhost:9200/customer/_shrink/customer01 -d '
 {
     "settings": {
         "index.number_of_shards": 1,
@@ -93,24 +155,16 @@ $ curl -XPOST http://localhost:9200/customer/_shrink/customer01 -d '
     }
 }'
 
-
-
-
-
-
-
-
-
 ```
 
-
-
-当现有索引被认为太大或太旧时，滚动索引API会将别名滚动到新的索引。
+#### 滚动
+* 当现有索引被认为太大或太旧时，滚动索引API会将别名滚动到新的索引。
 ```shell script
 # 创建索引 logs-0000001 别名为 apache_logs.
 # 如果 apache_logs 指向的索引是在7天以前创建的，或者包含1000个以上的文档
-# 则创建 logs-000002索引，并更新apache_logs别名指向logs-000002
-curl -XPUT localhost:9200/logs-000001 -d '
+# 则创建 logs-000002索引，并更新apache_l ogs别名指向 logs-000002
+# 使用别名创建索引
+curl -XPUT -H "Content-Type: application/json" localhost:9200/logs-000001 -d '
 {
     "aliases": {
         "apache_logs": {}
@@ -118,7 +172,7 @@ curl -XPUT localhost:9200/logs-000001 -d '
 }'
 
 # 创建滚动索引（按照时间和文档数量）
-curl -XPOST localhost:9200/apache_logs/_rollover -d '
+curl -XPOST -H "Content-Type: application/json" localhost:9200/apache_logs/_rollover -d '
 {
     "conditions": {
         "max_age": "7d",
@@ -126,29 +180,35 @@ curl -XPOST localhost:9200/apache_logs/_rollover -d '
     }
 }'
 
+history | grep external
 ```
 
 
+### 文档操作
+* 每个数据都会有版本，类似于乐观上锁的概念，小于某一个版本就会不让进行更新
 
 ```shell script
+## 添加
+curl -XPUT http://localhost:9200/customer02?pretty 
+curl -XPOST -H "Content-Type: application/json" http://localhost:9200/customer02/external/1?pretty -d '{"doc": { "name": "Natsu", "age": 20}}' 
+curl -XGET http://localhost:9200/customer02/external/1?pretty
 
-#文档操作
-curl -XPUT -H "Content-Type: application/json" http://localhost:9200/facebook/external/1?pretty -d '
-{
-    "name": "Natsu"
-}'
+## 删除
+curl -XDELETE http://localhost:9200/customer02/external/1?pretty
+curl -XGET http://localhost:9200/customer02/external/1?pretty
+curl -XGET http://localhost:9200/_cat/indices?v
 
-curl -XGET http://localhost:9200/customer/external/1?pretty
+## 更新(doc 或者 script 更新其中之一)
+curl -XPOST -H "Content-Type: application/json" http://localhost:9200/customer02/external/3?pretty -d '{"doc": { "name": "Natsu"}}'
+curl -XGET http://localhost:9200/customer02/external/3?pretty
+curl -XPOST -H "Content-Type: application/json" http://localhost:9200/customer02/external/3/_update?pretty -d '{"doc": { "name": "Natsu", "age": 20}}'
+# 感觉结果跟预想的不一致(没有在原来的位置进行更新)
+curl -XGET http://localhost:9200/customer02/external/3?pretty
+# 可以使用Rest命令执行更新。如将年龄增加5：
+curl -XPOST -H "Content-Type: application/json" http://localhost:9200/customer02/external/3/_update?pretty -d '{ "script": "ctx._source.age += 5" }'
 
-#删除
-$ curl -XDELETE http://localhost:9200/customer/external/1?pretty
 
 
-$ curl -XPOST -H "Content-Type: application/json" http://localhost:9200/customer/external/2/_update?pretty -d '{"doc": { "name
-": "Natsu", "age": 20}}'
-
-#  可以使用Rest命令执行更新。如将年龄增加5：
-$ curl -XPOST http://localhost:9200/customer/external/2/_update?pretty -d '{ "script": "ctx._source.age += 5" }'
 
 
 
@@ -295,8 +355,11 @@ Header
 
 
 
+
+
 # ElasticSearch 云析学院
-## 5.6版本
+## 学习版本：5.6版本
+## 实践版本：7.2版本
 
 * 作用领域
     - 日志、电商、blog
@@ -317,12 +380,56 @@ Header
     - 悬浮
     - 冲停
 
-### 版本：5.6.16
+### 
 refresh
 flush
 fsync
 
 默认分区策略：  5个分片  一个副本
+
+
+## 第二节 Rest API
+* 学习版本：5.6.16
+* 实践版本：5.6.16
+
+
+* 颜色状态
+    * yellow 所有分片正常分布，但是副本缺失 
+    * red 
+    * green
+
+
+
+
+
+
+### 文档
+### 映射
+### 集群
+### 状态查询
+
+
+
+
+```shell script
+curl -X GET http://localhost:9200/_cat/health?help
+curl -X GET http://localhost:9200/_cat/health?v
+curl -X GET http://localhost:9200/_cat/health?format=yaml
+
+```
+
+## 第三节
+
+## 第四节
+
+## 第五节
+
+
+
+
+
+
+
 
 
 
