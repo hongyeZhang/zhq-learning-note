@@ -1,35 +1,68 @@
 # Elasticsearch 学习笔记
 
+## 前言
+* word学习笔记见文件夹
+* 学习版本：5.6版本
+* 实践版本：7.2版本
+
+
 ## chapter1 概述
 
-默认不允许root用户运行
-./elasticsearch -Des.insecure.allow.root=true
-
-vim /etc/sysctl.conf
- chown -R zhq:zhq elasticsearch-5.6.16
- chown -R zhq:zhq elasticsearch-6.8.6
+* 安装及启动
+    * 默认不允许root用户运行  
+    * ./elasticsearch -Des.insecure.allow.root=true
+    * vim /etc/sysctl.conf
+    * chown -R zhq:zhq elasticsearch-5.6.16
+    * chown -R zhq:zhq elasticsearch-6.8.6
  
 ```shell script
 #后台启动
 ./elasticsearch -d  
-
 #验证： 
 curl -XGET http://localhost:9200/_cat/health?v
-
 #安装设置
 #临时设置，当Linux重新启动会恢复到设置之前的值。
 sysctl -w vm.max_map_count=262144
-
 # 查看结果：
 sysctl -a|grep vm.max_map_count
 # 显示： vm.max_map_count = 262144
-
 #永久设置 在 /etc/sysctl.conf文件最后添加一行
 # vm.max_map_count=262144
+```
+
+```shell script
+curl -X GET http://localhost:9200/_cat/health?help
+curl -X GET http://localhost:9200/_cat/health?v
+curl -X GET http://localhost:9200/_cat/health?format=yaml
 
 ```
 
+* 作用领域
+    - 日志、电商、blog
+    - 分布式调用链路追踪
+    - 降价提醒、业务智能分析
+* 基本概念
+    - 集群
+    - 节点    
+    - ZenDiscovery 自动发现 命名服务
+    - 分片 shared
+    - 副本 replicas
+    - types 
+    - mappings
+    - query DSL
+    - 近实时搜索
+    - 持久化更新
+* 磁头
+    - 悬浮
+    - 冲停
+
+
 ## chapter2 Rest API
+
+* 颜色状态
+    * yellow 所有分片正常分布，但是副本缺失 
+    * red 
+    * green
 
 ### 索引操作
 * 索引命令规约： rest命令/索引库/类型/id
@@ -186,6 +219,7 @@ history | grep external
 
 ### 文档操作
 * 每个数据都会有版本，类似于乐观上锁的概念，小于某一个版本就会不让进行更新
+* 不允许修改分片（分片一旦确定下来，就不能修改），可以修改副本
 
 ```shell script
 ## 添加
@@ -208,10 +242,6 @@ curl -XGET http://localhost:9200/customer02/external/3?pretty
 curl -XPOST -H "Content-Type: application/json" http://localhost:9200/customer02/external/3/_update?pretty -d '{ "script": "ctx._source.age += 5" }'
 
 
-
-
-
-
 #占用的磁盘用量
 curl -XGET localhost:9200/_cat/allocation?v
 curl -XGET localhost:9200/_cat/master?v
@@ -221,6 +251,59 @@ curl -XPOST -H "Content-Type: application/json"  http://localhost:9200/zhq_clq/e
  -d '{"doc": { "name": "Natsu", "age": 20}}'
 
 ```
+
+#### 状态查询
+
+```shell script
+curl -X GET localhost:9200/_cat/allocation?pretty
+curl -X GET localhost:9200/_cat/allocation?help
+curl -X GET localhost:9200/_cat/shards?pretty
+curl -X GET localhost:9200/_cat/shards/customer?pretty
+# 查询段信息
+curl -X GET localhost:9200/_cat/segments?pretty
+# 查询群集的文档数
+curl -X GET localhost:9200/_cat/count?v
+#线程池状态查询
+curl -X GET localhost:9200/_cat/thread_pool?v
+```
+
+## chapter3 mapping
+
+* mapping ~= schema  元数据定义
+* 在创建数据时，可以通过mapping指定数据类型。同样也可以不指定，通过es的自动推断实现
+
+
+### 映射
+
+```shell script
+
+curl -X PUT localhost:9200/customer01?pretty
+curl -X GET localhost:9200/_cat/indices/customer01?v
+curl -X GET localhost:9200/customer01?pretty
+
+curl -X GET localhost:9200/_cat/indices?v
+curl -X DELETE localhost:9200/custo*?pretty
+curl -XPOST -H "Content-Type: application/json" http://localhost:9200/customer01/external/1?pretty -d '{"name": "Natsu", "age": 20}'
+
+#查看数据的信息
+curl -X GET localhost:9200/customer01/external/1?pretty
+#查看索引的信息
+curl -X GET localhost:9200/customer01?pretty
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
 
 ### 操作例子
 
@@ -321,12 +404,15 @@ curl -XPOST -H "Content-Type: application/json" 'localhost:9200/get-together/_se
 
 
 
-## 
+## 插件
+X-Pack
+Header
 
-* 基于URL的搜索请求
-* 基于主体的搜索请求
 
-## 版本采坑（真TM多）
+
+
+
+## 版本采坑记录
 
 * 过滤查询已被弃用，并在ES 5.0中删除
 * 6.0的版本不允许一个index下面有多个type，并且官方说是在接下来的7.0版本中会删掉type
@@ -336,112 +422,4 @@ curl -XPOST -H "Content-Type: application/json" 'localhost:9200/get-together/_se
 * 5.x之后，Elasticsearch对排序、聚合所依据的字段用单独的数据结构(fielddata)缓存到内存里了，但是在text字段上默认是禁用的，如果有需要单独开启，这样做的目的是为了节省内存空间
 * 过滤查询已被弃用，并在ES 5.0中删除。
   解决： 使用bool / must / filter查询
-
-
-
-
-## 映射
-
-
-
-
-
-
-
-## 插件
-X-Pack
-Header
-
-
-
-
-
-
-# ElasticSearch 云析学院
-## 学习版本：5.6版本
-## 实践版本：7.2版本
-
-* 作用领域
-    - 日志、电商、blog
-    - 分布式调用链路追踪
-    - 降价提醒、业务智能分析
-* 基本概念
-    - 集群
-    - 节点    
-    - ZenDiscovery 自动发现 命名服务
-    - 分片 shared
-    - 副本 replicas
-    - types 
-    - mappings
-    - query DSL
-    - 近实时搜索
-    - 持久化更新
-* 磁头
-    - 悬浮
-    - 冲停
-
-### 
-refresh
-flush
-fsync
-
-默认分区策略：  5个分片  一个副本
-
-
-## 第二节 Rest API
-* 学习版本：5.6.16
-* 实践版本：5.6.16
-
-
-* 颜色状态
-    * yellow 所有分片正常分布，但是副本缺失 
-    * red 
-    * green
-
-
-
-
-
-
-### 文档
-### 映射
-### 集群
-### 状态查询
-
-
-
-
-```shell script
-curl -X GET http://localhost:9200/_cat/health?help
-curl -X GET http://localhost:9200/_cat/health?v
-curl -X GET http://localhost:9200/_cat/health?format=yaml
-
-```
-
-## 第三节
-
-## 第四节
-
-## 第五节
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
-
-
 
