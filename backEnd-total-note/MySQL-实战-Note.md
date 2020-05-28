@@ -102,14 +102,45 @@ mysqlbinlog  --base64-output=decode-rows -v  /var/lib/mysql/mysql_bin.000001|les
 
 ```
 
-
-
 ## 基础知识
+
+
+
+### SQL分类
+* DDL（Data Definition Languages）
+    * 数据定义语言，这些语句定义了不同的数据段、数据库、表、列、索引等数据库对象的定义。
+    * 常用的语句关键字主要包括 create、drop、alter等。
+* DML（Data Manipulation Language）
+    * 数据操纵语句，用于添加、删除、更新和查询数据库记录，并检查数据完整性，
+    * 常用的语句关键字主要包括 insert、delete、udpate 和select 等。(增添改查）
+* DCL（Data Control Language）
+    * 数据控制语句，用于控制不同数据段直接的许可和访问级别的语句。
+    * 这些语句定义了数据库、表、字段、用户的访问权限和安全级别。主要的语句关键字包括 grant、revoke 等。
+
+
 ### 数据类型：
 * MySQL支持多种类型，大致可以分为三类：数值、日期/时间、字符串(字符)类型。
     - 严格数值数据类型(INTEGER、SMALLINT、DECIMAL和NUMERIC)，以及近似数值数据类型(FLOAT、REAL和DOUBLE PRECISION)。
     - 表示时间值的日期和时间类型为 DATETIME、DATE、TIMESTAMP、TIME和YEAR。
     - 字符串类型指 CHAR、VARCHAR、BINARY、VARBINARY、BLOB、TEXT、ENUM 和 SET。
+    - blob text 数据类型慎用
+
+#### blob
+* Blob是一个二进制的对象，它是一个可以存储大量数据的容器(如图片，音乐等等)，且能容纳不同大小的数据。
+    在MySQL中有四种Blob类型，他们的区别就是可以容纳的信息量不容分别是以下四种:
+    * TinyBlob类型  最大能容纳255B的数据
+    * Blob类型  最大能容纳65KB的
+    * MediumBlob类型  最大能容纳16MB的数据
+    * LongBlob类型  最大能容纳4GB的数据
+* 如果Blob中存储的文件的大小过大的话，会导致数据库的性能很差。
+* 插入Blob类型的数据以及读取Blob类型的数据的方式:
+    * 插入Blob类型的数据
+          插入Blob类型的数据时，需要注意必须要用 PreparedStatement，因为Blob类型的数据是不能
+          够用字符串来拼的，在传入了SQL语句后，就需要去调用PreparedStatement对象中的setBlob(int index , InputStream in)方法来设置传入的的参数，
+          其中index表示Blob类型的数据所对应的占位符(?)的位置，而InputStream类型的in表示被插入文件的节点流。
+    * 读取Blob类型的数据
+          读取Blob类型相对来说比较容易，当获取了查询的结果集之后，使用getBlob()方法读取到Blob
+          对象，然后调用Blob的getBinaryStream()方法得到输入流，再使用IO操作进行文件的写入操作即可。
 
 
 ## SQL
@@ -275,9 +306,24 @@ select name from <tableName> where name regexp 'ic|uc|ab'; 匹配包括其中任
 
 
 ### insert
+
+* INSERT IGNORE 与INSERT INTO的区别就是INSERT IGNORE会忽略数据库中已经存在 的数据，如果数据库没有数据，就插入新的数据，
+    如果有数据的话就跳过这条数据。这样就可以保留数据库中已经存在数据，达到在间隙中插入数据的目的。
+* ON DUPLICATE KEY UPDATE  如果存在值，则插入，否则更新值
+
+
 ```mysql
 
+# 插入所有的字段，要么全写，要么不写，字符串类型的数据必须要加上引号
+insert into department (id, d_name, function, d_address) values (1005, '后勤部', '保障产品', '研发四楼');
+insert into department values (1005, '后勤部', '保障产品', '研发四楼');
+# 插入多条数据
+insert into department (id, d_name, function, d_address) values (1007, '销售部', '销售产品', '研发三楼'),(1008, '销售部2', '销售产品2', '研发三楼2');
+# 将查询出来的结果插入新的表格  
+insert into product (name, property) select name, property from medicine;
+
 INSERT INTO runoob_tbl (runoob_title, runoob_author, submission_date) VALUES ("学习 PHP", "菜鸟教程", NOW());
+
 
 
 
@@ -312,6 +358,77 @@ delete 操作以后，使用 optimize table table_name 会立刻释放磁盘空�
 ```mysql
 SELECT country FROM Websites UNION SELECT country FROM apps ORDER BY country;
 ```
+
+
+### join
+
+
+### join
+* JOIN的含义就如英文单词“join”一样，连接两张表，大致分为内连接，外连接，右连接，左连接，自然连接。
+
+笛卡尔积：CROSS JOIN
+要理解各种JOIN首先要理解笛卡尔积。笛卡尔积就是将A表的每一条记录与B表的每一条记录强行拼在一起。
+所以，如果A表有n条记录，B表有m条记录，笛卡尔积产生的结果就会产生n*m条记录。下面的例子，
+t_blog有10条记录，t_type有5条记录，所有他们俩的笛卡尔积有50条记录。有五种产生笛卡尔积的方式如下。
+    SELECT * FROM t_blog CROSS JOIN t_type;
+    SELECT * FROM t_blog INNER JOIN t_type;
+    SELECT * FROM t_blog,t_type;
+    SELECT * FROM t_blog NATURE JOIN t_type;
+    select * from t_blog NATURA join t_type;
+
+内连接：INNER JOIN
+内连接INNER JOIN是最常用的连接操作。从数学的角度讲就是求两个表的交集，从笛卡尔积的角度讲
+就是从笛卡尔积中挑出ON子句条件成立的记录。有INNER JOIN，WHERE（等值连接），STRAIGHT_JOIN,
+JOIN(省略INNER)四种写法。
+    SELECT * FROM t_blog INNER JOIN t_type ON t_blog.typeId=t_type.id;
+    SELECT * FROM t_blog,t_type WHERE t_blog.typeId=t_type.id;
+    SELECT * FROM t_blog STRAIGHT_JOIN t_type ON t_blog.typeId=t_type.id; --注意STRIGHT_JOIN有个下划线
+    SELECT * FROM t_blog JOIN t_type ON t_blog.typeId=t_type.id;
+
+左连接：LEFT JOIN
+左连接LEFT JOIN的含义就是求两个表的交集外加左表剩下的数据。依旧从笛卡尔积的角度讲，就是
+先从笛卡尔积中挑出ON子句条件成立的记录，然后加上左表中剩余的记录。
+SELECT * FROM t_blog LEFT JOIN t_type ON t_blog.typeId=t_type.id;
+
+
+右连接：RIGHT JOIN
+同理右连接RIGHT JOIN就是求两个表的交集外加右表剩下的数据。再次从笛卡尔积的角度描述，
+右连接就是从笛卡尔积中挑出ON子句条件成立的记录，然后加上右表中剩余的记录。
+SELECT * FROM t_blog RIGHT JOIN t_type ON t_blog.typeId=t_type.id;
+
+外连接：OUTER JOIN
+外连接就是求两个集合的并集。从笛卡尔积的角度讲就是从笛卡尔积中挑出ON子句条件成立的记录，
+然后加上左表中剩余的记录，最后加上右表中剩余的记录。
+另外MySQL不支持OUTER JOIN，但是我们可以对左连接和右连接的结果做UNION操作来实现。
+    SELECT * FROM t_blog LEFT JOIN t_type ON t_blog.typeId=t_type.id
+    UNION
+    SELECT * FROM t_blog RIGHT JOIN t_type ON t_blog.typeId=t_type.id;
+
+USING子句
+
+MySQL中连接SQL语句中，ON子句的语法格式为：table1.column_name = table2.column_name。
+当模式设计对联接表的列采用了相同的命名样式时，就可以使用 USING 语法来简化 ON 语法，格式为：USING(column_name)。
+所以，USING的功能相当于ON，区别在于USING指定一个属性名用于连接两个表，而ON指定一个条件。
+另外，SELECT *时，USING会去除USING指定的列，而ON不会。实例如下。
+
+SELECT * FROM t_blog INNER JOIN t_type USING(typeId);
+    ERROR 1054 (42S22): Unknown column 'typeId' in 'from clause'
+    SELECT * FROM t_blog INNER JOIN t_type USING(id); -- 应为t_blog的typeId与t_type的id不同名，无法用Using，这里用id代替下
+
+自然连接：NATURE JOIN
+
+自然连接就是USING子句的简化版，它找出两个表中相同的列作为连接条件进行连接。有左自然连接，
+右自然连接和普通自然连接之分。在t_blog和t_type示例中，两个表相同的列是id，所以会拿id作为连接条件。
+另外千万分清下面三条语句的区别 。
+自然连接:SELECT * FROM t_blog NATURAL JOIN t_type;
+笛卡尔积:SELECT * FROM t_blog NATURA JOIN t_type;
+笛卡尔积:SELECT * FROM t_blog NATURE JOIN t_type;
+
+* 内连接与外连接的区别
+　　* 内连接,显示两个表中有联系的所有数据;
+　　* 左链接,以左表为参照,显示所有数据;
+　　* 右链接,以右表为参照显示数据;
+
 
 
 ### order by
@@ -372,8 +489,6 @@ drop table <tableName> 删除没有被关联的普通表
 删除存在外键关联的表格时，需要首先删除外键约束，然后再执行删除表格的语句
 ```
 
-
-
 ### alter
 ```mysql
 # 修改表名： 
@@ -382,6 +497,27 @@ ALTER TABLE testalter_tbl RENAME TO alter_tbl;
 
 
 ### 事务
+
+* 事务四大特征(ACID)
+    * 原子性(A)：事务是最小单位，不可再分
+    * 一致性(C)：事务要求所有的DML语句操作的时候，必须保证同时成功或者同时失败
+    * 隔离性(I)：事务A和事务B之间具有隔离性
+    * 持久性(D)：是事务的保证，事务终结的标志(内存的数据持久到硬盘文件中)
+* 事务隔离级别
+    * 未提交读（Read uncommitted）
+    * 已提交读(Read committed)
+    * 可重复读(Repeatable read)
+    * 可序列化(Serializable)。
+
+* 更新丢失：最后的更新覆盖了其他事务之前的更新，而事务之间并不知道，发生更新丢失。更新丢失，可以完全避免，应用对访问的数据加锁即可。
+* 脏读：(针对未提交的数据)一个事务在更新一条记录，未提交前，第二个事务读到了第一个事务更新后的记录，那么第二个事务就读到了脏数据，会产生对第一个未提交数据的依赖。一旦第一个事务回滚，那么第二个事务读到的数据，将是错误的脏数据。
+* 不可重复读：（读取数据本身的对比）一个事务在读取某些数据后的一段时间后，再次读取这个数据，发现其读取出来的数据内容已经发生了改变，就是不可重复读。
+* 幻读：（读取结果集条数的对比）一个事务按相同的查询条件查询之前检索过的数据，确发现检索出来的结果集条数变多或者减少（由其他事务插入、删除的），类似产生幻觉。
+
+* MySQL 默认的级别是:Repeatable read 可重复读。
+* 查看事务的隔离级别：show variables like '%isolation%';
+
+
 * 用 BEGIN, ROLLBACK, COMMIT 来实现
     - BEGIN 开始一个事务
     - ROLLBACK 事务回滚
@@ -495,53 +631,94 @@ show triggers;  查询触发器
 drop trigger <triggerName> 删除触发器
 ```
 
-========================      Chapter11   插入、更新与删除数据     ========================
-插入所有的字段，要么全写，要么不写，字符串类型的数据必须要加上引号
-insert into department (id, d_name, function, d_address) values (1005, '后勤部', '保障产品', '研发四楼');
-insert into department values (1005, '后勤部', '保障产品', '研发四楼');
-插入多条数据
-insert into department (id, d_name, function, d_address) values (1007, '销售部', '销售产品', '研发三楼'),
-(1008, '销售部2', '销售产品2', '研发三楼2');
-将查询出来的结果插入新的表格  
-insert into product (name, property) select name, property from medicine;
-update department set d_name= '二狗子' where id = 1001;
-delete from <tableName> where 条件;
-delete from <tableName> 将表中的所有记录删除
 
-========================      Chapter12   MySQL 运算符     ========================
+
+### 外键
+
+```mysql
+
+CREATE TABLE IF NOT EXISTS `class`(
+   `runoob_id` INT UNSIGNED AUTO_INCREMENT,
+   `runoob_title` VARCHAR(100) NOT NULL,
+   `runoob_author` VARCHAR(40) NOT NULL,
+   `submission_date` DATE,
+   PRIMARY KEY ( `runoob_id` )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+# 外键操作例子
+SET FOREIGN_KEY_CHECKS = 0;
+# 示例操作代码
+create table if not exists teacher(
+  id int primary key auto_increment,
+  name varchar(20)
+);
+insert into teacher(name) value('ff'),('ff1'),('ff2');
+
+create table if not exists course (
+  id int primary key auto_increment,
+  name varchar(20),
+  teacher_id int unique,
+  foreign key(teacher_id) references teacher(id)
+  on delete cascade
+  on update cascade
+);
+insert into course(teacher_id,name) value(2,'ee'),(1,'ee1'),(3,'ee2');
+# 测试命令
+delete from  teacher where  id=1;
+
+```
+
+
+
+
+
+
+### 运算符
+```mysql
 select a, a+3, a/3, a div 3 from t1;
 create table t1(
 a int
 )engine=InnoDB default charset=utf8;
 
-不等于 <>  !=   等于 = 或 <=>
-操作符都不能用来判断null，如果需要判断，则使用 is null, is not null
-通配符：_代表单个字符，% 代表任意多个字符
-&& 与 and  表示与操作符  || 和 or  表示或运算
-直接查看运行结果  select 1||null, null||null, 0||null;
+# 不等于 <>  !=   等于 = 或 <=>
+# 操作符都不能用来判断null，如果需要判断，则使用 is null, is not null
+# 通配符：_代表单个字符，% 代表任意多个字符
+# && 与 and  表示与操作符  || 和 or  表示或运算
+# 直接查看运行结果  select 1||null, null||null, 0||null;
 
-========================      Chapter13   MySQL 函数     ========================
+
+```
+
+
+### 函数
+```mysql
+
 select abs(-0.5), pi(), abs(0.5);
 select rand(), rand(), rand(2), rand(2);
 select concat('bei', 'jing'), concat_ws('-','bei','jing');
 select repeat('mysql', 2);
-日期和时间函数
+# 日期和时间函数
 select curdate(), current_date(), curtime(), current_time();
-now() 和 current_timestamp()都表示系统当前的日期和时间
-select benchmark(count, exp); 将exp执行count次，返回执行的时间
+# now() 和 current_timestamp()都表示系统当前的日期和时间
+# 将exp执行count次，返回执行的时间
+select benchmark(count, exp); 
 
 
-========================      Chapter14   储存过程和函数     ========================
-========================  这章很重要  =============================
-存储过程和函数是在mysql服务其中执行的， 已经写好的一段sql语句
-创建存储过程：
+```
+
+
+### 存储过程
+* 存储过程和函数是在mysql服务其中执行的， 已经写好的一段sql语句
+```mysql
+# 创建存储过程：
 create procedure num_from_employee(in emp_id int, out count_num int)
 reads sql data
 begin
 select count(*) into count_num from employee where id = emp_id;
 end
 
-但是实际运行时，需要临时将结束符号替换
+# 但是实际运行时，需要临时将结束符号替换
 delimiter &&
 create procedure num_from_employee(in emp_id int, out count_num int)
 reads sql data
@@ -550,14 +727,13 @@ select count(*) into count_num from employee where id = emp_id;
 end&&
 delimiter ;
 
-
-创建函数
+# 创建函数
 create function name_from_employee(emp_id int)
 returns varchar(10)
 begin
 return (select name from employee where id = emp_id);
 end
-但是实际运行时
+# 但是实际运行时
 delimiter &&
 create function name_from_employee(emp_id int)
 returns varchar(10)
@@ -585,12 +761,15 @@ alter procedure num_from_employee
 modifies sql data
 sql security invoker;
 删除：drop procedure | function <name>;
+```
 
-========================      Chapter15   MySQL 用户管理     ========================
-mysql 数据库下存储权限表
-新建用户
-(1) create user 'test1'@'localhost' identified by 'test1';
-用户名：test1 主机名：localhost  密码：test1
+
+### 用户管理
+```mysql
+# mysql 数据库下存储权限表
+# 新建用户
+create user 'test1'@'localhost' identified by 'test1';
+# 用户名：test1 主机名：localhost  密码：test1
 
 (2) insert mysql.user(host, user, password) values(...)
 执行完成之后使用户生效 flush privileges;
@@ -608,13 +787,7 @@ grant  授权 revoke 收回权限
 查看用户的授权  show grants for 'test1'@'localhost';
 
 
-========================      Chapter16   数据备份与还原     ====================
-查看mysqldump  备份数据库
-这章没啥可看的
-
-========================      Chapter17   日志     =============================
-这章没啥可看的
-
+```
 
 ========================      Chapter18   性能优化     ==========================
 show status like 'connections';  查询数据库的连接次数
@@ -624,7 +797,6 @@ explain select * from employee\G;
 建立多列索引：create index index_birth_department on student(birth, department);
 多列索引使用时，只有查询条件中使用了这个索引中的第一个字段时，才会起作用。
 
-尽量不要使用子查询，使用连接查询来代替
 
 
 
