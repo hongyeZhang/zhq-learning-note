@@ -1,3 +1,22 @@
+
+# SpringBoot 学习笔记
+
+## 自动配置
+
+### 注解学习
+* @EnableConfigurationProperties 
+    * 开启资源实体类的加载，也就是说开启配置文件映射为资源实体类的功能
+    * 使使用 @ConfigurationProperties 注解的类生效
+    * 如果一个配置类只配@Component注解，而没有使用@ConfigurationProperties，那么在IOC容器中是能获取到bean， 但会bean对象参数为null，
+        报异常：java.lang.IllegalArgumentException: Key argument cannot be null.
+    * 如果一个配置类只配置@ConfigurationProperties注解，而没有使用@Component，那么在IOC容器中是获取不到properties 配置文件转化的bean。
+        说白了 @EnableConfigurationProperties 相当于把使用 @ConfigurationProperties 的类进行了一次注入。
+
+* @ConditionalOnProperty
+    * 解是开启条件化配置
+
+
+
 ### 启动流程
 这篇文章讲的非常好！！！
 https://www.cnblogs.com/zheting/p/6707035.html
@@ -13,7 +32,7 @@ SpringFactoriesLoader属于Spring框架私有的一种扩展方案，其主要�
 @EnableAutoConfiguration自动配置的魔法骑士就变成了：从classpath中搜寻所有的META-INF/spring.factories配置文件，并将其中org.springframework.boot.autoconfigure.EnableutoConfiguration对应的配置项通过反射（Java Refletion）实例化为对应的标注了@Configuration的JavaConfig形式的IoC容器配置类，然后汇总为一个并加载到IoC容器。
 
 
-### 深入探索SpringApplication执行流程
+#### SpringApplication执行流程
 SpringApplication的run方法的实现是我们本次旅程的主要线路，该方法的主要流程大体可以归纳如下：
 
 1） 如果我们使用的是SpringApplication的静态run方法，那么，这个方法里面首先要创建一个SpringApplication对象实例，然后调用这个创建好的SpringApplication的实例方法。在SpringApplication实例初始化的时候，它会提前做几件事情：

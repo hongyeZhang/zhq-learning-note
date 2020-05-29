@@ -160,6 +160,11 @@ mvn tomcat7:deploy
 * 默认的依赖范围是compile
 * 作用域是test的包不会传递到引用这个项目的其它项目，但如果不是test会传递依赖到其它项目。
 
+
+* <optional>true</optional>和<scope>provided</scope>之间的区别
+在添加依赖项时，我们可以使用optional标志，或将scope设置为“provided”。在这两种情况下，依赖关系都将在声明它们的模块的classpath中，
+但是使用将它们定义为依赖关系的模块不会在其他项目中传递它们，即不会形成依赖传递。
+
 ## 实用技巧
 #### maven 实战命令
 ```
