@@ -1,0 +1,22 @@
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "match_all": {}
+      },
+      "boost": "5",
+      "functions": [
+        {
+          "filter": {
+            "match": {
+              "text_entry": "dream"
+            }
+          },
+          "weight": 33
+        }
+      ],
+      "score_mode": "max",
+      "boost_mode": "multiply"
+    }
+  }
+}
