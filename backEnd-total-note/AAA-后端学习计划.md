@@ -34,8 +34,9 @@ springboot 启动 自动配置
     * https://juejin.im/post/5e731d5c51882549554887bf
     
 
-
-
+## TODO
+* mac  docker
+* mac minikube
 
 
 
