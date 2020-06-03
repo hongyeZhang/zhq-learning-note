@@ -1,24 +1,5 @@
 
 
-curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
-{
-    "query": {"terms": { "play_name": ["night", "dream"] }}
-}'
-
-curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
-{
-    "query": {"range": {"speech_number": {"gte": 3,"lte": 5,"boost": 2.0}}}
-}'
-
-
-
-
-
-curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
-{
-    "query": {"wildcard": { "play_name": "t*th" }}
-}'
-
 
 
 curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
@@ -27,6 +8,61 @@ curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_searc
 }'
 
 curl -XGET localhost:9200/shakespeare/_search?pretty
+
+curl -XGET localhost:9200/_scripts/my_score?pretty
+
+
+curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
+{
+  "script_fields": {
+    "my_field": {
+      "script": {
+        "id": "my_score",
+        "params": {
+          "value": 2
+        }
+      }
+    }
+  }
+}'
+
+
+curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "script": {
+          "script": {
+            "lang": "painless",
+            "source": "doc.line_id.value > 1"
+          }
+        }
+      }
+    }
+  }
+}'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

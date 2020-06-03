@@ -982,134 +982,248 @@ curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_searc
 ### 关联查询
 * join 一般不建议使用，谨慎使用
 
+* 路由  
+    * 索引路由(index)
+    * 搜索路由(search)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-====================================================================================================
-
-
-
-
-
-### 操作例子
-
-
+### 特定查询
+* MLT Query (mor like this)  查询与给定文档相似的文档
+查询与给定文档“相似”的文档。如：查询所有商品中“标题”和“描述”字段中都包含类似于“xxxx”的文字，并将Term的数量限制为5个：
 ```shell script
+curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
+{
+  "query": {
+    "more_like_this": {
+      "like": "as well as",
+      "fields": [
+        "play_name",
+        "text_entry"
+      ],
+      "min_term_freq": 1,
+      "max_query_terms": 5
+    }
+  }
+}'
 
-# 创建一个索引
-curl -XPUT localhost:9200/zhq_index1?pretty
-
-# 索引一篇文档
-curl -XPUT -H "Content-Type: application/json" localhost:9200/get-together/group/1?pretty -d '{"name":"Elasticsearch Denver", "origanizer":"Lee"}'
-curl -XGET localhost:9200/get-together/_mapping?pretty  # 索引内所有类型的映射
-curl -XGET localhost:9200/get-together/_mapping/group?pretty  # 索引具体类型(group)的映射
-
-
-curl "localhost:9200/get-together/group/_search?q=elasticsearch&fields=name,location&size=1&pretty"
-
-curl "localhost:9200/get-together/group/_search?q=elasticsearch&pretty"
-
-
-curl -XPOST -H "Content-Type: application/json" 'localhost:9200/get-together/group/_search?pretty
-' -d '{"query":{"query_string":{"query":"elasticsearch"}}}'
-
-# 通过ID查询文档
-curl 'localhost:9200/get-together/group/1?pretty'
-
-
-curl 'localhost:9200/_cat/shards?v'
-
-
-curl 'localhost:9200/get-together/group/_mapping?pretty'\
-
-## 映射相关
-curl -XPUT -H "Content-Type: application/json" 'localhost:9200/get-together/group/100' -d '{"name":"last night with elasticsearch", "date":"2013-10-25T19:00"}'
-
-curl 'localhost:9200/get-together/_mapping/group?pretty'
-
-# 创建映射
-curl -XPUT -H "Content-Type: application/json" 'localhost:9200/get-together/_mapping/group' -d '{"group":{"properties":{"zhq_host":{"type":"text"}}}}'
-
-
-
-
-curl -XPUT 'localhost:9200/zhq_together?pretty'
-curl 'localhost:9200/_cat/indices?pretty'
-
-
-curl -XPUT -H "Content-Type: application/json" 'localhost:9200/zhq_together/new_events/1?pretty' -d '{"name":"Late night with es ", "date":"2020-02-27"}'
-curl -XPOST -H "Content-Type: application/json" 'localhost:9200/zhq_together/new_events/_search?pretty' -d '{"query":{"query_string":{"query":"late"}}}'
+curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
+{
+  "query": {
+    "more_like_this": {
+      "fields": [
+        "play_name",
+        "text_entry"
+      ],
+      "like": [
+        {
+          "_index": "blog",
+          "_type": "doc",
+          "_id": 1
+        },
+        {
+          "_index": "abcd",
+          "_type": "doc",
+          "_id": 2
+        },
+        "English and French"
+      ],
+      "min_term_freq": 1,
+      "max_query_terms": 5
+    }
+  }
+}'
+```
 
 
-curl -XPUT -H "Content-Type: application/json" 'localhost:9200/zhq_blog/posts/1?pretty' -d '{"tags":["first", "initial"]}' 
+MLT的工作原理：假如想查找与给定输入文档相似的所有文档，那么可以肯定的是：输入文档本身应该是该类型查询的最佳匹配。根据Lucene评分公式，输入文档中tf-idf最高的术语可以很好地代表该文档。MLT查询所做的是仅从输入文档中提取文本，然后选择tf-idf最高的前K个词构成查询。
+要使用MLT，涉及的字段必须建立索引，并且其类型为text或keyword。另外，当对文档使用like时，必须启用_source，或必须为stored，或存储term_vector。
+为了加快查询速度，可以在索引时指定term_vector是否存储
 
 
-curl -XPUT -H "Content-Type: application/json" 'localhost:9200/zhq_get/manual_id/1st?pretty' -d '{"name":"elasticsearch denver"}' 
+* Script Query
+* 该查询允许脚本充当过滤器，通常是在过滤上下文中使用：
+    * query context 有打分
+    * filter context 无打分，被缓存
+```shell script
+curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "script": {
+          "script": {
+            "lang": "painless",
+            "source": "doc.line_id.value > 1"
+          }
+        }
+      }
+    }
+  }
+}'
 
 
+# 为了加快执行速度，脚本会被编译和缓存。
+# 如果使用相同的脚本，只是参数不同，那么最好的方式是将参数传递给脚本。
+curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
+{
+   "query": {
+      "bool": {
+         "filter": {
+            "script": {
+               "script": {
+                   "lang": "painless",
+                   "source": "doc.line_id.value > params.value",
+                   "params": {
+                      "value": 80
+                   }
+               }
+            }
+         }
+      }
+   }
+}'
 
-#索引更新
-curl 'localhost:9200/get-together/group/2?pretty'
-curl -XPOST -H "Content-Type: application/json" 'localhost:9200/get-together/group/2/_update' -d '{"doc":{"organizer":"Roy"}}'
-
-#通过一个文档来更新原来的索引
-curl -XPUT -H "Content-Type: application/json" 'localhost:9200/online-shop/shirts/1?version=1' -d '{"caption":"zhq learning elasticsearch", "price":5}'
-
-
-curl -XDELETE 'localhost:9200/online-shop/shirts/1?pretty'
-
-
-#分页搜索
-curl 'localhost:9200/get-together/_search?from=1&size=3&pretty'
-
-curl 'localhost:9200/get-together/_search?sort=date:asc&pretty'
-
-# 只搜索文档中的某几个字段
-curl 'localhost:9200/get-together/_search?sort=date:asc&_source=name,description&pretty'
-
-# 只在name中查找包含指定字段的数据
-curl 'localhost:9200/get-together/_search?sort=date:asc&q=name:elasticsearch&pretty'
-
-
-#基于请求主体的搜索
-curl -XPOST -H "Content-Type: application/json" 'localhost:9200/get-together/_search?pretty' -d '{"query":{"match_all":{}}, "from":1, "size":3}'
-
-curl -XPOST -H "Content-Type: application/json" 'localhost:9200/get-together/_search?pretty' -d '{"query":{"match_all":{}}, "_source":["name", "description"]}'
-
-curl -XPOST -H "Content-Type: application/json" 'localhost:9200/get-together/_search?pretty' -d '{"query":{"match_all":{}}, "_source":{"include":["name", "description"], "exclude":["created_on"]}}'
-
-curl -XPOST -H "Content-Type: application/json" 'localhost:9200/get-together/_search?pretty' -d '{"query":{"match_all":{}}, "sort":[{"created_on":"asc"},"_score"]}'
-
-
-curl -XPOST -H "Content-Type: application/json" 'localhost:9200/get-together/_search?pretty' -d '{"query":{"match":{"name":"Elasticsearch"}}}'
-
-
-curl -XPOST -H "Content-Type: application/json" 'localhost:9200/get-together/_search?pretty' -d '{"query":{"term":{"tags":"jvm"}}}'
 ```
 
 
 
-## 插件
-X-Pack
-Header
+
+* Template Query(6.X版本之上就不存在了)
+
+## chapter8 Elasticsearch 脚本
+### elasticsearch 表达式
+* 使用脚本，可以在Elasticsearch中评估自定义表达式。例如，可以使用脚本来返回“脚本字段”作为搜索请求的一部分，或者评估查询的自定义分数。“painless
+”为默认的脚本语言。painless、expression为Elasticsearch内置支持。
+在Elasticsearch API中使用脚本都遵循相同的格式：
+* 5.x版本支持groovy、javascript、python、java等语言，javasript、python需要安装模块支持。
+* 6.x版本增加了mustach内置支持，取消groovy、javascript、python支持，java需要自己写插件进行支持。
+
+
+```shell script
+"script": {
+    # 指定脚本表达式的语言
+    "lang": "painless|expression|groovy|javascript|mustach|python|java",
+    # 加载脚本的方式：source源码，id已经存在的脚本，file存储在文件中的脚本
+    "source" | "id" | "file": ".....",
+    "params": { ..... }
+}
+
+curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
+{
+  "script_fields": {
+    "my_field": {
+      "script": {
+        "lang": "painless",
+        "source": "doc.line_id.value * params.value",
+        "params": {
+          "value": 2
+        }
+      }
+    }
+  }
+}'
+
+```
+* painless和expression是默认内置的脚本表达式。painless是默认的脚本语言。
+* 使用_scripts RestAPI将脚本存储在集群中或者使用已经存储在集群中的脚本。
+* 默认情况下，所有脚本都是被缓存的，因此仅在更新时才需要重新编译它们，它没有过期时间。script.cache.expire
+* 默认情况下，脚本没有超时期限，但是可以使用 script.cache.expire 设置更改此行为
+* 默认情况下，脚本缓存大小为100M。可以使用 script.cache.max_size 设置配置此缓存的大小。
+
+* 存在文件中的脚本
+    * 6.x上该功能已经取消
+    * 为了提高安全性，非沙盒语言只能在群集的每个节点上存储的脚本文件中指定，脚本目录的默认位置：$ES_HOME/config/scripts
+* 节点启动的时候会自动编译，加载到缓存中。默认60s自动编译一次，可以通过 resource.reload.interval 设置默认自动加载时间。
+
+```shell script
+#创建脚本
+curl -XPOST -H "Content-Type: application/json" localhost:9200/_scripts/my_score?pretty -d'
+{
+  "script": {
+    "lang": "painless",
+    "source": "doc.line_id.value * params.value"
+  }
+}'
+#查看脚本
+curl -XGET localhost:9200/_scripts/my_score?pretty
+
+#根据脚本查询
+curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
+{
+  "script_fields": {
+    "my_field": {
+      "script": {
+        "id": "my_score",
+        "params": {
+          "value": 2
+        }
+      }
+    }
+  }
+}'
+
+```
+
+* 脚本引擎
+    * ScriptEngine是用于实现脚本语言的后端。它也可以用于编写需要使用脚本内部高级功能的脚本。例如，一个脚本希望在评分时使用词频。需要实现ScriptEngine
+    ，同时应实现ScriptPlugin接口并覆盖getScriptEngine方法。
+
+* Lucene表达式把javascript编译成字节码。主要使用目的：高性能自定义排名和排序而设计。
+* Lucene表达式支持Javascript语法的子集，是使用基于JavaScript的语法指定的表达式。可以使用以下方式构造表达式：
+    * 整数，浮点数，十六进制和八进制文本
+    * 算术运算符：+ - * / %   | & ^ ~ << >> >>>
+    * 布尔和三元运算符：       && || ! ?:
+    * 比较运算符:                    < <= == >= >
+    * 常用数学函数：              abs ceil exp floor ln log10 logn max min sqrt pow
+    * 三角函数库：                  acosh acos asinh asin atanh atan atan2 cosh cos sinh sin tanh tan
+    * 距离函数：                     haversin
+    * 其他功能：                     min  max
+
+
+
+### lucene 表达式
+### Painless 表达式
+
+
+
+## chapter9 Elasticsearch 插件
+### X-Pack 插件
+安全
+审计
+监控 ==> 收集 ==> kibana
+告警 ==> email
+
+X-Pack是一个Elastic Stack(ELK)扩展
+安装要找到与ES对应的版本，但是7.0之后，默认会安装X-Pack
+
+配置文件写在 elasticsearch.yml中
+
+
+账户和密码
+elastic/changeme
+kibana/changeme
+kibana/changeme
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Header
 
 
 
