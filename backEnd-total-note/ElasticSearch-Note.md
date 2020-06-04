@@ -1202,7 +1202,690 @@ X-Pack是一个Elastic Stack(ELK)扩展
 账户和密码
 elastic/changeme
 kibana/changeme
-kibana/changeme
+logstash-system/changeme
+
+* 开启xpack和设置用户名密码
+```shell script
+# 修改config目录下面的elasticsearch.yml文件，添加如下代码到文件末，开启x-pack验证，并重启 elasticsearch服务
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+
+#设置用户名和密码的命令，这里需要为多个用户分别设置密码，全部都是 123456
+bin/elasticsearch-setup-passwords interactive
+需要设置密码的账户
+[apm_system]
+[kibana]
+[logstash_system]
+[beats_system]
+[remote_monitoring_user]
+[elastic]
+
+
+开启安全认证之后的查询方式
+curl -XGET -u elastic:123456 localhost:9200/_cat/indices?pretty
+curl -XGET -u elastic:123456 localhost:9200/.security-7?pretty
+
+
+
+```
+* 安全设置
+    * 字段(field)级别的安全和文档(document)级别的安全
+    * 各种参数设置
+* 监控设置
+    * 定义怎样搜集数据 
+* 审核设置
+    * 
+* 告警设置
+    * 注意必须打开监控
+
+* 本地导出器
+* HTTP导出器
+
+#### 使用插件
+* 用户管理
+* 角色管理
+* 权限管理
+* 字段和文档级安全
+
+```shell script
+#查看证书
+curl -XGET -u elastic:123456 localhost:9200/_xpack/license?pretty
+curl -XGET -u elastic:123456 localhost:9200/_xpack?
+
+
+#查看所有的用户信息
+curl -XGET -u elastic:123456 localhost:9200/_xpack/security/user?pretty
+
+#修改用户密码
+
+#新增用户
+curl -XPOST -H "Content-Type:application/json" -u elastic:123456 localhost:9200/_xpack/security/user/zhq -d'
+{
+  "password": "123456",
+  "roles": [
+    "admin",
+    "other_role1"
+  ],
+  "full_name": "hanghuanqiang",
+  "email": "zhq@test.com"
+}'
+ 
+# 查看用户 
+$ curl -XGET -u elastic:abcd_123 localhost:9200/_xpack/security/user?pretty
+
+# 禁用用户
+$ curl -XPOST -u elastic:abcd_123 localhost:9200/_xpack/security/user/yunxi/_disabled
+
+# 启用用户
+$ curl -XPOST -u elastic:abcd_123 localhost:9200/_xpack/security/user/yunxi/_enabled
+
+# 删除用户
+$ curl -XDELETE -u elastic:abcd_123 localhost:9200/_xpack/security/user/yunxi
+```
+
+
+* 角色管理
+```shell script
+# 查看所有的角色
+curl -XGET -u elastic:123456 localhost:9200/_xpack/security/role?pretty
+
+# 创建角色，进行文档级别控制（但是basic版本的xpack不支持到文档级别的控制）
+curl -XPOST -H "Content-Type:application/json" -u elastic:123456 localhost:9200/_xpack/security/role/my_role -d'
+{
+  "cluster": [
+    "all"
+  ],
+  "indices": [
+    {
+      "names": [
+        "news",
+        "blog"
+      ],
+      "privileges": [
+        "all"
+      ],
+      "field_security": {
+        "grant": [
+          "title",
+          "body"
+        ]
+      },
+      "query": "{\"match\": {\"title\": \"foo\"} }"
+    }
+  ],
+  "run_as": [
+    "other_user"
+  ],
+  "metadata": {
+    "version": 1
+  }
+}'
+
+
+```
+
+* 权限管理
+    * has_privileges可以确定登录的用户具有的特权列表。所有用户都可以使用此API，但只能查看自己的特权。
+
+
+```shell script
+
+curl -XPOST -H "Content-Type:application/json" -u elastic:123456 localhost:9200/_xpack/security/role_mapping/administrator -d '
+{
+  "roles": [
+    "user",
+    "admin"
+  ],
+  "enabled": true,
+  "rules": {
+    "field": {
+      "username": [
+        "admin01",
+        "admin02"
+      ]
+    }
+  }
+}'
+
+curl -XGET -u elastic:123456 localhost:9200/_xpack/security/role_mapping/administrator?pretty
+
+curl -XGET -u elastic:123456 localhost:9200/_xpack/security/role_mapping?pretty
+
+
+```
+
+
+
+### Elastic SQL
+* Elasticsearch SQL是一个X-Pack组件，它允许针对Elasticsearch实时执行类似SQL的查询。无论使用REST接口，命令行还是JDBC，任何客户端都可以使用SQ
+搜索或聚合数据。可以将Elasticsearch SQL看作是一种翻译器，它可以将SQL解释成Elasticsearch可以理解的查询语言，并利用Elasticsearch完成大规模读取和处理数据。
+
+
+```shell script
+curl -XPOST -H "Content-Type:application/json" -u elastic:123456 localhost:9200/_sql?pretty -d'{"query":"select * from shakespeare"}'
+```
+
+ 
+
+
+
+## chapter10 聚合
+### 基本概念
+* 桶
+    * 简单来说就是满足特定条件的文档的集合。当聚合开始被执行，每个文档里面的值通过计算来决定符合哪个桶的条件。如果匹配到，文档将放入相应的桶并接着进行聚合操作。
+* 指标
+    * 桶能让我们划分文档到有意义的集合，但是最终我们需要的是对这些桶内的文档进行一些指标的计算。分桶是一种达到目的的手段：它提供了一种给文档分组的方法来让我们可以计算感兴趣的指标。
+      大多数 指标 是简单的数学运算（例如最小值、平均值、最大值，还有汇总），这些是通过文档的值来计算。在实践中，指标能让你计算像平均薪资、最高出售价格、95%的查询延迟这样的数据。
+* 聚合  单指标聚合、多指标聚合
+    * 分桶聚合（Bucketing）
+    * 指标聚合（Metric）
+    * 矩阵聚合（Matrix）
+    * 管道聚合（Pipeline）
+
+
+* 指标聚合 该聚合是根据要聚合的文档提取出来字段值来进行指标计算。
+    * 平均值（avg）
+
+```shell script
+#导入 account的数据
+curl -H "Content-Type: application/json" -XPOST -u elastic:123456 localhost:9200/people/bank/_bulk?pretty --data-binary @accounts.json
+
+#平均值聚合(avg)
+curl  -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?pretty&size=0" -d'
+{
+  "aggs": {
+    "avg_agg": {
+      "avg": {
+        "field": "balance"
+      }
+    }
+  }
+}'
+# 由脚本生成指标
+curl -H "Content-Type: application/json" -XPOST -u elastic:123456 "localhost:9200/people/_search?pretty&size=0" -d'
+{
+  "aggs": {
+    "avg_agg": {
+      "avg": {
+        "script": {
+          "source": "doc.balance.value"
+        }
+      }
+    }
+  }
+}'
+
+
+# 求和聚合
+curl  -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?pretty&size=0" -d'
+{
+  "aggs": {
+    "sum_agg": {
+      "sum": {
+        "field": "balance"
+      }
+    }
+  }
+}'
+
+# 最大值聚合
+curl  -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?pretty&size=0" -d'
+{
+  "aggs": {
+    "max_agg": {
+      "max": {
+        "field": "balance"
+      }
+    }
+  }
+}'
+#最小值聚合
+curl  -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?pretty&size=0" -d'
+{
+  "aggs": {
+    "min_agg": {
+      "min": {
+        "field": "balance"
+      }
+    }
+  }
+}'
+
+
+#地理边界（geo_bounds）  用于计算包含一个字段geo_point值的边界框
+curl -XPOST "localhost:9200/restaurants/_search?pretty&size=0" -d'
+{
+   "query": {
+      "match": { "name": "restaurant" }
+   },
+   "aggs": {
+      "geo_restaurant" : {
+         "geo_bounds" : {
+             "field": "location"
+         }
+      }
+   }
+}'
+
+#地理中心
+curl -XPOST "localhost:9200/restaurants/_search?pretty&size=0" -d'
+{
+   "aggs": {
+      "geo_restaurant" : {
+         "geo_centroid" : {
+            "field": "location"
+         }
+      }
+   }
+}'
+
+#百分比聚合 percentiles
+#多指标聚合，该聚合针对从聚合文档中提取的数值计算一个或多个百分位数。假设日志数据包含接口响应时间，对管理员来说平均和中位数加载时间并无太大用处，最大值可能更有用。
+#可以指定算法
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?pretty&size=0" -d'
+{
+  "aggs": {
+    "age_outlier": {
+      "percentiles": {
+        "field": "age"
+      }
+    }
+  }
+}'
+
+# 指定某个百分比范围
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?pretty&size=0" -d'
+{
+  "aggs": {
+    "age_outlier": {
+      "percentiles": {
+        "field": "age",
+        "percents": [
+          90,
+          95,
+          99
+        ]
+      }
+    }
+  }
+}'
+
+#百分比等级（percentile_ranks）
+#多指标聚合，该聚合根据从聚合文档中提取的数值计算出一个或多个百分数等级。
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" -XPOST "localhost:9200/people/_search?pretty&size=0" -d'
+{
+  "aggs": {
+    "age_outlier": {
+      "percentile_ranks": {
+        "field": "balance",
+        "values": [
+          25000,
+          50000
+        ]
+      }
+    }
+  }
+}'
+
+#基数聚合 cardinality
+
+
+
+
+
+```
+* 基数聚合
+    * 单值指标聚合，用于计算不同值的近似计数。它提供一个字段的基数，即该字段的 distinct 或者 unique 值的数目。可以以如下SQL来帮助理解该聚合：
+* 每天访问网站的独立IP有多少 bitmap(位图算法)  
+    * hyperLogLog
+ 
+```shell script
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?pretty&size=0" -d'
+{
+  "aggs": {
+    "name_count": {
+      "cardinality": {
+        "field": "firstname.keyword"
+      }
+    }
+  }
+}'
+```
+
+* Top聚合 
+
+```shell script
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty=true" -d'
+{
+  "aggs": {
+    "top_tags": {
+      "terms": {
+        "field": "lastname.keyword",
+        "size": 6
+      },
+      "aggs": {
+        "top_balance_hits": {
+          "top_hits": {
+            "sort": [
+              {
+                "balance": {
+                  "order": "desc"
+                }
+              }
+            ],
+            "_source": {
+              "includes": [
+                "firstname",
+                "lastname",
+                "age",
+                "balance"
+              ]
+            },
+            "size": 1
+          }
+        }
+      }
+    }
+  }
+}'
+```
+
+#### 分桶聚合
+桶聚合不像指标聚合那样计算字段的值，而是创建文档存储桶。每个桶都与一个标准/查询（取决于聚合类型）相关联，该标准/查询确定文档是否“落入”其中，存储桶有效地定义了文档集。除了存储桶本身之外，桶聚合还计算并返回“落入”每个存储桶的文档数量。
+
+* 过滤聚合
+```shell script
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty=true" -d'
+{
+  "aggs": {
+    "gender_filter": {
+      "filter": {
+        "term": {
+          "gender.keyword": "M"
+        }
+      },
+      "aggs": {
+        "balance_price": {
+          "avg": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  }
+}'
+
+
+
+
+
+```
+
+* 多过滤聚合（filters）
+定义一个多桶聚合，其中每个桶都与一个过滤器相关联。每个存储桶将收集与其关联的过滤器匹配的所有文档。
+
+```shell script
+
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty=true" -d'
+{
+  "aggs": {
+    "bank_filter": {
+      "filters": {
+        "filters": {
+          "state": {
+            "match": {
+              "state.keyword": "AZ"
+            }
+          },
+          "name": {
+            "match": {
+              "lastname.keyword": "Hess"
+            }
+          }
+        }
+      }
+    }
+  }
+}'
+
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty=true" -d'
+{
+  "aggs": {
+    "bank_filter": {
+      "filters": {
+        "other_bucket": true,
+        "filters": {
+          "state": {
+            "match": {
+              "state.keyword": "AZ"
+            }
+          },
+          "name": {
+            "match": {
+              "lastname.keyword": "Hess"
+            }
+          }
+        }
+      }
+    }
+  }
+}'
+
+
+```
+ 
+* 范围聚合
+```shell script
+# 范围聚合
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
+{
+  "aggs": {
+    "age_range": {
+      "range": {
+        "field": "age",
+        "ranges": [
+          {
+            "to": 30
+          },
+          {
+            "from": 20,
+            "to": 25
+          },
+          {
+            "from": 40
+          }
+        ]
+      }
+    }
+  }
+}'
+
+# 在桶内再进行操作
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
+{
+  "aggs": {
+    "age_range": {
+      "range": {
+        "field": "age",
+        "ranges": [
+          {
+            "to": 30
+          },
+          {
+            "from": 20,
+            "to": 25
+          },
+          {
+            "from": 40
+          }
+        ]
+      },
+      "aggs": {
+        "balance_max": {
+          "max": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  }
+}'
+
+
+```
+* 日期范围聚合
+
+
+
+```shell script
+curl -XPOST localhost:9200/logstash-*/_search?size=0 -d'
+{
+   "aggs": {
+      "age_range": {
+         "date_range": {
+            "field": "utc_time",
+            "format": "yyyy-MM",
+            "ranges": [
+               { "to": "now+10M" },
+               { "from": "now-10M" }
+            ]
+         }
+      }
+   }
+}'
+
+```
+
+* 日期直方图聚合
+直方图的多桶聚合，但只能应用于日期值。可以通过日期/时间表达式指定间隔。
+```shell script
+curl -XPOST "localhost:9200/logstash-*/_search?size=0&pretty" -d'
+{
+   "aggs": {
+      "utc_time_agg": {
+         "date_histogram" : {
+            "field": "utc_time",
+            "interval": "day",
+            "format": "yyyy-MM-dd",
+            "offset": "+6h"
+         }
+      }
+   }
+}'
+
+```
+
+● interval
+时间间隔。可用表达式：year, quarter, month, week, day, hour, minute, second
+● key
+在Elasticsearch内部，日期表示为64位数字，表示自从该纪元以来以毫秒为单位的时间戳。这个时间戳作为桶的Key返回。key_as_string是使用format参数对时间戳进行格式化后的文本。
+● offset
+offset参数用于按指定的正（+）或负偏移（-）更改每个存储区的起始值，例如1h表示一个小时，或1d表示一天。
+
+
+* 地理距离聚合(geo_distance)
+    * 适用于geo_point
+    字段的多桶聚合，在概念上与范围聚合非常相似。用户可以定义一个原点和一组距离范围。聚合会评估每个文档值到原点的距离，并根据范围来确定它所属的桶（如果文档和原点之间的距离在存储桶的距离范围内，则文档属于存储桶）。
+    * 默认情况下，距离单位为m（米），但也可以设置为：mi（英里），in（英寸），yd（码），km（公里），cm（厘米），mm（毫米）。
+
+* 该聚合有两种距离计算模式：弧（arc，默认）和平面（plane）。弧计算是最准确的。平面最快但最不准确。当搜索跨越较小的地理区域（约5
+公里）时，请考虑使用平面。如果在非常大的区域内进行搜索（例如跨大陆搜索），平面将返回较高的误差范围。
+
+```shell script
+curl -XPOST "localhost:9200/restaurants/_search?size=0&pretty" -d'
+{
+   "aggs": {
+      "geo_range": {
+         "geo_distance": {
+            "field": "location",
+            "origin": "52.3760, 4.894",
+            "ranges": [
+               { "to": 100000 },
+               { "from": 100000, "to": 300000 },
+               { "from": 300000 }
+            ]
+         }
+      }
+   }
+}'
+
+curl -XPOST "localhost:9200/restaurants/_search?size=0&pretty" -d'
+{
+   "aggs": {
+      "geo_range": {
+         "geo_distance": {
+            "field": "location",
+            "origin": "52.3760, 4.894",
+            "unit": "km",
+            "ranges": [
+               { "to": 100000 },
+               { "from": 100000, "to": 300000 },
+               { "from": 300000 }
+            ]
+         }
+      }
+   }
+}'
+
+# tyoe = plane
+curl -XPOST "localhost:9200/restaurants/_search?size=0&pretty" -d'
+{
+   "aggs": {
+      "geo_range": {
+         "geo_distance": {
+            "field": "location",
+            "origin": "52.3760, 4.894",
+            "unit": "km",
+            "distance_type": "plane",
+            "ranges": [
+               { "to": 100000 },
+               { "from": 100000, "to": 300000 },
+               { "from": 300000 }
+            ]
+         }
+      }
+   }
+}'
+
+
+```
+
+* 地理网格聚合(geohash_grid)
+地理网格聚合(geohash_grid)
+适用于geo_point字段的多桶聚合。将地理坐标点分组到以网格为单元的桶中。每个单元格都使用可定义精度的geohash进行标记，聚合中使用的地理哈希可以在1到12之间选择精度（长度为12的最高精度geohash仅覆盖不到一平方米的区域，因此就RAM和结果大小而言，高精度geohash可能会更加昂贵）
+● 高精度：高精度地理哈希具有较长的字符串，每个单元仅覆盖较小区域。
+● 低精度：低精度地理哈希具有较短的字符串，每个单元都覆盖大面积的区域
+```shell script
+curl -XPOST "localhost:9200/restaurants/_search?size=0&pretty" -d'
+{
+   "aggs": {
+      "zoom_filter": {
+         "filter" : {
+            "geo_bounding_box": {
+               "location": {
+                  "top_left": "52.4, 4.9",
+                  "bottom_right": "52.3, 5.0"
+               }
+            }
+         },
+         "aggs": {
+            "zoom_agg": {
+               "geohash_grid": {
+                  "field": "location",
+                  "precision": 8
+               }
+            }
+         }
+      }
+   }
+}'
+
+
+
+
+```
+
+* 词项聚合（terms）
 
 
 
@@ -1223,7 +1906,16 @@ kibana/changeme
 
 
 
-### Header
+### 基本概念
+
+
+
+
+
+
+
+
+
 
 
 

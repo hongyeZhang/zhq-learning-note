@@ -301,6 +301,11 @@ select name from <tableName> where name regexp '[ceo]'; 匹配包含c e o 任意
 select name from <tableName> where name regexp '[^ceo0-9]'; 匹配除了c e o和0-9的任意一个字符的字符串
 select name from <tableName> where name regexp 'ic|uc|ab'; 匹配包括其中任意一个的字符串，中间不能够有空格，否则查询错误
 
+
+# count(1)，其实就是计算一共有多少符合条件的行。
+select scene, count(1) from table group by scene;
+
+
 ```
 
 
