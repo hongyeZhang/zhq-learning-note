@@ -1888,6 +1888,125 @@ curl -XPOST "localhost:9200/restaurants/_search?size=0&pretty" -d'
 * 词项聚合（terms）
 
 
+* 排序
+可以通过设置Order参数来设置桶的顺序。默认情况下，桶会按照doc_count降序排列。不建议按_count升序或按子聚合排序，因为这会增加文档计数上的错误。
+```shell script
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "firstname.keyword",
+        "order": {
+          "_term": "desc"
+        }
+      },
+      "aggs": {
+        "max_balance": {
+          "max": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  }
+}'
+
+```
+* 过滤
+对桶进行过滤。可以设置include和exclude参数来完成，参数接受正则表达式或精确值数组。此外，include子句还可以使用分区表达式。
+```shell script
+# 使用include和exclude进行过滤
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "address.keyword",
+        "include": ".*Gatling.*",
+        "exclude": ".*Street"
+      }
+    }
+  }
+}'
+
+# 精确过滤
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "address.keyword",
+        "include": [
+          "105 Onderdonk Avenue",
+          "Street"
+        ]
+      }
+    }
+  }
+}'
+
+
+# 分区过滤
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "account_number",
+        "include": {
+          "partition": 0,
+          "num_partitions": 20
+        },
+        "size": 20,
+        "order": {
+          "max_balance": "desc"
+        }
+      },
+      "aggs": {
+        "max_balance": {
+          "max": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  }
+}'
+
+```
+
+* 搜集模式
+对于具有许多唯一术语和少量所需结果的字段，将子聚合的计算延迟到最上层父级aggs被聚合之前，可能会更有效。通常，聚合树的所有分支都以深度优先的方式进行扩展，然后才进行修剪。在某些情况下，这可能非常浪费，并且会遇到内存限制。如：在电影数据库中查询10个最受欢迎的演员及其5个最常见的联合主演：
+```shell script
+curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "firstname.keyword",
+        "size": 10,
+        "collect_mode": "breadth_first"
+      },
+      "aggs": {
+        "tops": {
+          "terms": {
+            "field": "firstname.keyword",
+            "size": 5
+          }
+        }
+      }
+    }
+  }
+}'
+```
+    
+
+
+
+
+
+
 
 
 
