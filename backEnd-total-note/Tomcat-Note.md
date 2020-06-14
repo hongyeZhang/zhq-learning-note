@@ -1,6 +1,21 @@
+# Tomcat 学习笔记
 https://www.bilibili.com/video/av67233983?from=search&seid=14904371206196478796
 
-## Tomcat专题
+## Tomcat 实战
+### 常用命令
+```shell script
+#启动和关闭
+sh startup.sh 
+netstat -tunlp | grep 8080
+sh shutdown.sh 
+
+
+
+
+```
+
+
+
 
 ### Tomcat基础
 软件架构：B/S  C/S

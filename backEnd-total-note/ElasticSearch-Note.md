@@ -134,7 +134,7 @@ curl -X POST http://localhost:9200/facebook01/_close?pretty
 curl -X POST http://localhost:9200/facebook01/_open?pretty
 
 #当索引关闭时 此操作会失效
-curl -XPUT -H "Content-Type: application/json" http://localhost:9200/facebook01/external/1?pretty -d '
+    curl -XPUT -H "Content-Type: application/json" http://localhost:9200/facebook01/external/1?pretty -d '
 {
     "name": "Natsu"
 }'
@@ -2029,6 +2029,38 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:920
 
 
 
+## 插件安装
+第一种：命令行
+
+    bin/elasticsearch-plugin install [plugin_name] elasticsearch-head
+    # bin/elasticsearch-plugin install analysis-smartcn  安装中文分词器
+
+第二种：url安装
+
+    bin/elasticsearch-plugin install [url]
+    #bin/elasticsearch-plugin install https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-smartcn/analysis-smartcn-6.4.0.zip
+
+第三种：离线安装
+    
+    #https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-smartcn/analysis-smartcn-6.4.0.zip
+    #点击下载analysis-smartcn离线包
+    #将离线包解压到ElasticSearch 安装目录下的 plugins 目录下
+    #重启es。新装插件必须要重启es
+
+
+```
+bin/elasticsearch-plugin install [plugin_name]
+/bin/elasticsearch-plugin list
+/bin/elasticsearch-plugin remove [pluginname]
+```
+
+
+
+
+## 可视化
+ElasticSearch的可视化工具有很多，比如elasticsearch-head、Dejavu、ElasticHD等。
+
+查看es可视化工具建议用kibana或者cerebro
 
 
 
