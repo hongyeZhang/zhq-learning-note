@@ -1,6 +1,14 @@
 
 # Dubbo
 
+## 参考链接
+* http://dubbo.apache.org/zh-cn/blog/dubbo-invoke.html
+
+
+
+
+
+
 ## 简介
 三大核心能力：
 面向接口的远程方法调用、智能容错和负载均衡、服务自动注册与发现
