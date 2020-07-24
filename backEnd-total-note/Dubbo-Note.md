@@ -46,3 +46,14 @@ hello-dubbo-service-user-provider
 
 消费者的实现视频
 https://www.bilibili.com/video/av35685648/?p=19
+
+
+## 实战笔记
+### 调用方式
+
+* 
+
+
+
+
+

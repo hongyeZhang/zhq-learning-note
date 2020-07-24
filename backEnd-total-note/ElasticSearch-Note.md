@@ -41,17 +41,24 @@ curl -X GET http://localhost:9200/_cat/health?format=yaml
     - 日志、电商、blog
     - 分布式调用链路追踪
     - 降价提醒、业务智能分析
+    - 反向搜索
+       * 价格监控
+       * 新闻警报
+       * 股票警告
+       * 日志监控
+       * 天气预报
+       * 库存警报
 * 基本概念
     - 集群
     - 节点    
-    - ZenDiscovery 自动发现 命名服务
+    - ZenDiscovery 自动发现 命名服务  自动将节点加到集群中
     - 分片 shared
-    - 副本 replicas
-    - types 
-    - mappings
+    - 副本 replicas  有的公司（linkedin）不用副本，因为影响性能，用在数据不重要的情况下。
+    - types 类似于table
+    - mappings  类似于 schema
     - query DSL
-    - 近实时搜索
-    - 持久化更新
+    - 近实时搜索  内存缓存 -> 文件系统缓存 -> 硬盘磁盘, 认为写到文件系统缓存中，就可以搜索出来了
+    - 持久化更新  translog 通过提交日志，进行持久化更新
 * 磁头
     - 悬浮
     - 冲停

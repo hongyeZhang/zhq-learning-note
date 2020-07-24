@@ -22,8 +22,14 @@ export GRADLE_HOME GRADLE_USER_HOME PATH
 
 
 #MAVEN
-exprot M2_HOME=/Users/ZHQ/Desktop/software/maven/apache-maven-3.6.3
+export M2_HOME=/Users/ZHQ/Desktop/software/maven/apache-maven-3.6.3
 export PATH=$PATH:$M2_HOME/bin
+
+#ZK
+export ZK_HOME=/Users/ZHQ/Desktop/software/zookeeper/zookeeper-3.4.14
+export PATH=$PATH:$ZK_HOME/bin
+
+
 
 #修改的环境变量立即生效
 source ~/.bash_profile
