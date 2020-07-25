@@ -1,9 +1,20 @@
 # Elasticsearch 学习笔记
 
+
+## 学习参考资料
+* 系统学习ElasticSearch
+    * https://zhuanlan.zhihu.com/p/135939591
+
+
+
+
 ## 前言
 * word学习笔记见文件夹
 * 学习版本：5.6版本
 * 实践版本：7.2版本
+
+
+
 
 
 ## chapter1 概述
@@ -72,6 +83,7 @@ curl -X GET http://localhost:9200/_cat/health?format=yaml
     * green
 
 ### 索引操作
+* 索引默认是json格式  但是可以人为指定 yml 格式
 * 索引命令规约： rest命令/索引库/类型/id
 
 #### 创建
@@ -275,10 +287,8 @@ curl -X GET localhost:9200/_cat/thread_pool?v
 ```
 
 ## chapter3 mapping
-
 * mapping ~= schema  元数据定义
 * 在创建数据时，可以通过mapping指定数据类型。同样也可以不指定，通过es的自动推断实现
-
 
 ### 映射
 
@@ -297,6 +307,7 @@ curl -X GET localhost:9200/_cat/thread_pool?v
 	* 以地理位置 或距中心点的距离汇总文档
 	* 按距离打分
 	* 按距离排序
+* date  elasticsearch中没有date类型，通过折中的方式来处理
 
 
 
@@ -319,11 +330,6 @@ curl -XPOST -H "Content-Type: application/json" http://localhost:9200/customer01
 curl -X GET localhost:9200/customer01/external/1?pretty
 #查看索引的信息
 curl -X GET localhost:9200/customer01?pretty
-
-
-
-
-
 # elasticsearch-7 上执行失败，elasticsearch-7 默认不支持指定索引类型
 curl -XPUT -H "Content-Type: application/json" localhost:9200/customer02 -d '
 {
