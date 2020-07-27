@@ -236,7 +236,7 @@ adress varchar(30)
 )engine=InnoDB default charset=utf8;
 
 insert into employee (num, id ,name, age, sex, adress) values (1,1001,'张三',20,'男','北京');
-insert into employee (num, id ,name, age, sex, adress) values (2,1002,"张四",18,"女","上海");
+insert into employee (num, id ,name, age, sex, adress) values (2,1002,'张四',18,'女','上海'');
 insert into employee (num, id ,name, age, sex, adress) values (3,1003,'张五',19,'男','北京');
 insert into employee (num, id ,name, age, sex, adress) values (4,1004,'张六',26,'男','深圳');
 insert into employee (num, id ,name, age, sex, adress) values (5,1005,'张七',33,'女','青岛');

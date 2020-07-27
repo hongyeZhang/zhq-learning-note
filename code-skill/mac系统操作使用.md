@@ -34,4 +34,7 @@ export PATH=$PATH:$ZK_HOME/bin
 #修改的环境变量立即生效
 source ~/.bash_profile
 
+#查看开启的端口
+lsof -i:3306
+
 ```
