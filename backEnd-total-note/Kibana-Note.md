@@ -327,9 +327,307 @@ GET /customer10/_search
 		}
 	}
 }
+
+PUT /customer0001
+{
+  "mappings": {
+    "properties": {
+      "content": {
+        "type": "text",
+        "analyzer": "standard",
+        "search_analyzer": "standard"
+      }
+    }
+  }
+}
+
+#设置清除脏数据
+PUT /customer0003
+{
+  "mappings": {
+    "properties": {
+      "age": {
+        "type": "integer"
+      },
+      "salary": {
+        "type": "integer",
+        "coerce": false
+      }
+    }
+  }
+}
+
+#可以自动做类型转换
+PUT /customer0003/_doc/2
+{
+"age":"10"
+}
+
+#如下语句会报错
+PUT /customer0003/_doc/3
+{
+"salary":"10"
+}
+
+#copyto的使用，组成一个大的字符串
+{
+  "mappings": {
+    "properties": {
+      "first_name": {
+        "type": "text",
+        "copy_to": "full_name"
+      },
+      "last_name": {
+        "type": "text",
+        "copy_to": "full_name"
+      },
+      "full_name": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+#字段排序和聚合的设置
+{
+  "mappings": {
+    "properties": {
+      "province_code": {
+        "type": "keyword"
+      },
+      "order_id": {
+        "type": "text",
+//        不会进行排序和聚合
+        "doc_values": false
+      }
+    }
+  }
+}
+
+#dynamic 参数的设置
+#dynamic属性用于检测新字段，有三个选项：
+#true：新发现的字段自动添加到映射中
+#false：新发现的字段被忽略，必须显式添加字段
+#strict：如果检测到新字段，抛出异常并拒绝添加文档。
+
+{
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "province_code": {
+        "type": "keyword"
+      },
+      "location_code": {
+        "dynamic": true,
+        "properties": {}
+      }
+    }
+  }
+}
+
+#设置为enabled，则ES不会对该字段进行索引
+{
+  "mappings": {
+    "properties": {
+      "province_code": {
+        "type": "keyword"
+      },
+      "location_code": {
+        "enabled": false
+      }
+    }
+  }
+}
+
+# format属性主要用于格式化日期
+{
+  "mappings": {
+    "properties": {
+      "order_date": {
+        "type": "date",
+        "format": "yyyy-MM-dd"
+      }
+    }
+  }
+}
+
+#ignore_above用于指定字段索引和存储的长度最大值，超过最大值的会被忽略：
+{
+  "mappings": {
+    "properties": {
+      "message": {
+        "type": "keyword",
+        "ignore_above": "15"
+      }
+    }
+  }
+}
+
+#ignore_malformed可以忽略不规则数据。给一个字段索引不合适的数据类型发生异常，导致整个文档索引失败。
+#如果ignore_malformed参数设为true，异常会被忽略，出异常的字段不会被索引，其它字段正常索引。
+{
+  "mappings": {
+    "properties": {
+      "age": {
+        "type": "integer",
+        "ignore_malformed": true
+      },
+      "salary": {
+        "type": "integer"
+      }
+    }
+  }
+}
+
+
+
+
+
+# properties
+# Object类型或者nested类型，因为有层级嵌套，所以我们可以通过properties来指定这种层级嵌套关系
+{
+  "mappings": {
+    "properties": {
+      "teacher": {
+        "properties": {
+          "name": {
+            "type": "text"
+          },
+          "salary": {
+            "type": "integer"
+          },
+          "age": {
+            "type": "integer"
+          }
+        }
+      },
+      "student": {
+        "properties": {
+          "name": {
+            "type": "text"
+          },
+          "number": {
+            "type": "text"
+          },
+          "class": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
+
+# 默认情况下，字段被索引也可以搜索，但是不存储，因为_source字段里面保存了一份原始文档。在某些情况下，比如一个文档里面有title、
+# date和超大的content字段，如果只想获取title和date：
+{
+  "mappings": {
+    "properties": {
+      "author": {
+        "type": "text",
+        "store": true
+      },
+      "title": {
+        "type": "text",
+        "store": true
+      },
+      "content": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+
+##############################################     动态模板      #############################################
+#通过 dynamic_templates，可以拥有对新字段的动态映射规则拥有完全的控制。可以设置根据字段名称或者类型来使用一个不同的映射规则。
+#每个模板都有一个名字，可以用来描述这个模板做了什么。同时它有一个 mapping 用来指定具体的映射信息，和至少一个参数（比如 match）
+#用来规定对于什么字段需要使用该模板。
+PUT /customer0014
+{
+  "mappings": {
+    "dynamic_templates": [
+      {
+        "long_to_string": {
+        "match_mapping_type": "string",
+        "match": "age_*",
+        "unmatch": "*_age",
+        "mapping": {
+          "type": "long"
+        }
+      }
+    }]
+  }
+}
+
+PUT /customer0014/_doc/1
+{
+  "age_1":"5",
+  "1_age":"OOXX"
+}
 ```
 
+
+
+### 别名
+```shell script
+
+#查看别名
+GET  /_cat/aliases
+
+PUT /customer00016
+#创建别名
+PUT /customer00016/_alias/my_index
+
+PUT /customer00017
+POST /_aliases
+{
+  "actions": [
+    {
+      "add": {
+        "index": "customer0017",
+        "alias": "my_index"
+      }
+    }
+  ]
+}
+
+#根据别名查跟那些索引关联起来了
+# 查看别名指向了哪一个索引
+GET /*/_alias/my_index
+
+
+
+PUT /customer0021
+{
+  "mappings": {
+    "properties": {
+      "name": {
+        "type": "text",
+        "index": false
+      }
+    }
+  }
+}
+#插入相关的文档
+PUT /customer0021/_doc/3
+{
+"name":"jackson"
+}
+
+#查询所有的相关文档
+GET /customer0021/_search
+```
+
+
+
 ### 查询相关的操作
+* 官网导入测试数据
+    * https://blog.csdn.net/u012224510/article/details/86571305
+
+
+* Domain Specific Languague。ES基于DSL+Json来进行查询。
+
 ```shell script
 GET user/_search
 {
@@ -337,6 +635,103 @@ GET user/_search
         "match_all": {}
     }
 }
+
+GET /shakespeare/_search
+{
+	"query": {
+	  "match": {
+        // 默认是 or 操作符
+		"text_entry": "men flight"
+	  }
+	}
+}
+
+GET /shakespeare/_search
+{
+  "query": {
+    "match": {
+      "text_entry": {
+        "query": "men flight",
+        // 指定  and 操作符
+        "operator": "and"
+      }
+    }
+  }
+}
+
+
+GET /shakespeare/_search
+{
+  "query": {
+    "match": {
+      "text_entry": {
+        "query": "in the highst degree",
+        // 至少需要匹配 4 个query 中的关键字
+        "minimum_should_match": 4
+      }
+    }
+  }
+}
+
+
+GET /shakespeare/_search
+{
+  "query": {
+    "match_phrase": {
+      "text_entry": {
+        "query": "in the highst degree",
+        // 
+        "slop": 2
+      }
+    }
+  }
+}
+
+
+GET /shakespeare/_search
+{
+  "query": {
+    "match_phrase_prefix": {
+      "text_entry": "table of her"
+    }
+  }
+}
+
+GET /shakespeare/_search
+{
+  "query": {
+    "match_phrase_prefix": {
+      "text_entry": {
+        "query": "in the",
+        "max_expansions": 10
+      }
+    }
+  }
+}
+
+
+GET /shakespeare/_search
+{
+  "query": {
+    "multi_match": {
+      // query 和 filed 之间是 或 的关系
+      "query": "dream flight",
+      "fields": ["text_entry", "play_name"]
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```
 

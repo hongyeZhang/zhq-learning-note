@@ -1,15 +1,8 @@
 {
-  "mappings": {
-    "properties": {
-      "name": {
-        "type": "text",
-        "fields": {
-          "length": {
-            "type": "token_count",
-            "analyzer": "standard"
-          }
-        }
-      }
+  "query": {
+    "multi_match": {
+      "query": "dream flight",
+      "fields": ["text_entry", "play_name"]
     }
   }
 }
