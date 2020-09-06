@@ -1,4 +1,17 @@
-### 基本知识
+# Redis学习笔记
+
+
+## 《Redis设计与实现》学习笔记
+### chapter2 简单动态字符串
+* SDS (simple dynamic string) 简单动态字符串 保存数据库中的字符串值，不是直接使用C字符串，而是重新定义了一个struct
+* 惰性空间释放策略，避免缩短时进行内存的重分配
+* 可以复用 string.h 中的部分c的字符串处理函数
+
+### chapter3 链表
+* 
+
+
+## 基础知识
 
 Redis ，全称 Remote Dictionary Server ，是一个基于内存的高性能 Key-Value 数据库。
 

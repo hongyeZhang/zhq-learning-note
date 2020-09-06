@@ -1,4 +1,20 @@
 
+# HBase学习
+
+## 基础知识
+* google
+    * BigFS    HDFS 
+    * MapReduce  
+    * BigTable  HBase
+* 过滤器 where
+* 谓词下推
+
+
+##
+
+
+
+
 
 quorum n. 法定人数
 
