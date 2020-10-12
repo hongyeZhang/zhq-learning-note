@@ -1,6 +1,19 @@
 
 # JDK源码类阅读
 
+
+## 集合类
+### HashSet
+* HashSet实现了Set接口，它的底层是由HashMap来支持的。HashSet的元素实际上是存储在底层HashMap的key上的。由于HashMap的无序不重复特性，
+HashSet存储的元素也是无序的，并且元素也不能重复，同时也只允许存储一个null元素
+    * https://juejin.im/post/6844903497385639943
+
+### LinkedHashSet
+* 它的底层是一个LinkedHashMap，元素的所有操作都是由LinkedHashMap来维护。LinkedHashSet与HashSet的区别和LinkedHashMap与HashMap的区别一样，
+    LinkedHashMap和LinkedHashSet是有序的，内部由双向链表来记录顺序，而HashMap和HashSet都是无序的
+
+
+
 ### HashMap  JDK1.8
     https://segmentfault.com/a/1190000012926722?utm_source=tag-newest
     
