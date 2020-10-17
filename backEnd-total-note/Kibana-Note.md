@@ -1,10 +1,6 @@
 
 # kibana学习笔记
-
 * javascript 开发的，所以需要 node.js
-* 
-
-
 
 ## 安装
 * reference
@@ -20,34 +16,25 @@ curl -XGET 192.168.41.129:9200/.kibana?pretty
 ```
 
 
-
-
-更改目录权限
+* 更改目录权限
 ```shell script
 # 更改 kibana 目录的权限，否则会报错
 chown -R zhq:zhq kibana
-
-
 ```
-
 * 验证
     * ip:5601
     * ip:5601/status  查看kibana的状态
 
-
-
-
-
-
 ## 使用
-搜索时使用 lucene 的 query string 表达式
-
-fusion chart
-eschart
+* 搜索时使用 lucene 的 query string 表达式
+* fusion chart
+* eschart
 
 
 ## 操作命令
 ```shell script
+GET /_cat/indices
+
 #删除
 DELETE /facebook
 PUT /zhq
@@ -84,7 +71,6 @@ POST /user/_open
 * 创建文档的适合id可以省略不写，系统会自动添加
 
 ```shell script
-
 PUT /user/
 {
   "settings": {
@@ -160,8 +146,6 @@ DELETE /user/_doc/1
 
 ### 滚动
 * 日志文件进行滚动
-
-
 
 ### 映射
 ```shell script
@@ -243,29 +227,13 @@ PUT /customer08/_doc/1
 		"lte": "2020-11-18"
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ```
 
 * mapping 信息，自动推断数据类型
-
-
 ```shell script
 {
   "customer01" : {
-    "aliases" : { },
+    "aliases" : {},
     "mappings" : {
       "properties" : {
         "age" : {
@@ -595,9 +563,6 @@ POST /_aliases
 #根据别名查跟那些索引关联起来了
 # 查看别名指向了哪一个索引
 GET /*/_alias/my_index
-
-
-
 PUT /customer0021
 {
   "mappings": {
@@ -617,31 +582,29 @@ PUT /customer0021/_doc/3
 
 #查询所有的相关文档
 GET /customer0021/_search
+
+
+
 ```
 
-
-
-### 查询相关的操作
-* 官网导入测试数据
-    * https://blog.csdn.net/u012224510/article/details/86571305
-
-
-* Domain Specific Languague。ES基于DSL+Json来进行查询。
-
+### Match
 ```shell script
-GET user/_search
-{
-    "query": {
-        "match_all": {}
-    }
-}
-
 GET /shakespeare/_search
 {
 	"query": {
 	  "match": {
         // 默认是 or 操作符
 		"text_entry": "men flight"
+	  }
+	}
+}
+
+GET /shakespeare/_search
+{
+	"query": {
+	  "match": {
+        // 精确短语匹配
+		"text_entry": "take the flight"
 	  }
 	}
 }
@@ -680,7 +643,6 @@ GET /shakespeare/_search
     "match_phrase": {
       "text_entry": {
         "query": "in the highst degree",
-        // 
         "slop": 2
       }
     }
@@ -709,7 +671,6 @@ GET /shakespeare/_search
   }
 }
 
-
 GET /shakespeare/_search
 {
   "query": {
@@ -720,20 +681,585 @@ GET /shakespeare/_search
     }
   }
 }
+```
 
+## Query String
+* 官网导入测试数据
+    * https://blog.csdn.net/u012224510/article/details/86571305
+* Domain Specific Languague。ES基于DSL+Json来进行查询。
 
+### Field
+```shell script
+GET user/_search
+{
+    "query": {
+        "match_all": {}
+    }
+}
 
+GET /shakespeare/_search
+{
+    "query": {
+       "query_string": {
+          "default_field": "text_entry",
+          "query": "take AND flight OR dream"
+       }
+    }
+}
 
+GET /shakespeare/_search
+{
+    "query": {
+       "query_string": {
+          "default_field": "text_entry",
+          "query": "dr?am fli*"
+       }
+    }
+}
+```
 
+### 通配符
+* 通配符搜索可以使用？替换单个字符，或者使用*号替换零个或者多个多个字符：
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+       "query_string": {
+          "default_field": "text_entry",
+          "query": "/take? fl[i|a]ght/"
+       }
+    }
+}
 
+# 查多个字段
+GET /shakespeare/_search
+{
+    "query": {
+       "query_string": {
+          "fields": ["text_entry", "play*"],
+          "query": "take AND flight OR dream"
+       }
+    }
+}
 
+```
 
+### 模糊
+* 使用模糊运算符搜索与我们的搜索字词类似但不完全相同的字词：
+```properties
+micheal~
+```
 
+### 邻近
+* 与模糊查询可以为单词中的字符指定最大编辑距离的方式相同，邻近搜索允许我们指定短语中单词的最大编辑距离：
+```properties
+"dream flight"~3
+```
 
+### 范围
+* 为日期、数字或者字符串指定查询范围。[min TO max]代表指定包含范围，{min TO max}代表指定排它范围。
+```shell script
+# 指定时间范围
+date:[2018-11-26 TO 2019-11-25]
+# 指定数值范围
+num:[1 TO 5]
+# 指定字符范围
+city: [SH TO TJ]
+# 指定上边界和下边界
+date:{* TO 2019-11-25]
+date:[2018-11-26 TO *}
+age:>10
+age:(>=10 AND <20)
+```
 
+### 权重
+* 可以使用boost 运算符^使一个术语比另一个术语更相关。 默认 boost 值为1，但可以是任何正浮点数：
+```shell script
+# 如果我们想要找到关于flight的所有文档，但我们对dream flight特别感兴趣：
+dream^2 flight
+# 对短语进行权重设置
+"Michael Jackson"^2
+# 对群组进行权重设置
+(Michael Jackson)^2
+```
+
+### 布尔
+* 默认情况下，只要一个词匹配，其他词都是可选的。搜索dream flight men将查找包含一个或多个dream，或flight，或 men任何文档。
+但如果我们想强制要求所有的术语，则可以通过布尔查询，来进行更多的控制
+```shell script
+# dream和flight是可选的
+# mother必须出现
+# men一定不能存在
+dream flight +mother -men
+# 布尔运算符 AND， OR 以及 NOT（也写作&&， || 和!）
+((dream AND flight) OR (men AND mother) OR their) AND not advantage
+
+# 这个查询也没有生效
+GET /shakespeare/_search
+{
+	"query": {
+	  "match": {
+		"text_entry": "dream +flight"
+	  }
+	}
+}
 
 
 ```
+
+### 分组
+* 可以将多个术语或子句用括号组合在一起，以形成子查询： 
+```shell script
+(dream AND flight) OR men
+```
+
+
+
+## Simple_Query_String
+* simple_query_string 同 query_string 查询一样用lucene查询语法写查询串，和query_string不同的地方是：
+    * 具有更小的语法集；
+    * 查询串有错误，会忽略错误的部分，不抛出错误。
+
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+       "simple_query_string": {
+          "fields": ["text_entry", "play*"],
+          "query": "take +(the|thy) -flight dream",
+          "default_operator": "and"
+       }
+    }
+}
+
+```
+
+
+
+## 词项搜索
+### Term Query
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+        "term": { "play_name": "Henry IV" }
+    }
+}
+```
+
+### Terms Query
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+        "terms": { "play_name": ["Henry IV", "dream"] }
+    }
+}
+
+GET /shakespeare/_search
+{
+    "query": {
+        "terms": {
+           "text_entry": {
+               "index": "shakespeare",
+               "id": "102908",
+               "path": "play_name"
+           }
+       }
+    }
+}
+```
+
+### Range Query
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+        "range": {
+           "speech_number": {
+               "gte": 3,
+               "lte": 5,
+               "boost": 2.0  // 设置打分
+           }
+        }
+    }
+}
+
+# 举例使用，实际不能操作
+GET /shakespeare/_search
+{
+    "query": {
+        "range": {
+           "order_date": {
+               "gte": "now-1d/d",
+               "lte": "now/d"
+           }
+        }
+    }
+}
+# 举例使用，实际不能操作
+GET /shakespeare/_search
+{
+    "query": {
+        "range": {
+           "birth_date": {
+               "gte": "1995-10-31",
+               "lte": "2018-10",
+               "format": "yyyy-MM-dd||yyyy-MM||epoch_millis"
+           }
+        }
+    }
+}
+```
+
+### Prefix Query
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+       "prefix": { "play_name": "Hen" }
+    }
+}
+```
+
+### Wildcard Query
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+       "wildcard": { "play_name": "Hen*" }
+    }
+}
+```
+
+### Regexp Query
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+       "regexp": { "text_entry": "t.*er" }
+    }
+}
+```
+
+### Fuzzy Query
+* 模糊
+    * 使用模糊运算符搜索与我们的搜索字词类似但不完全相同的字词：
+
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+        "fuzzy":{
+          "text_entry":{
+            "value": "her",
+            "fuzziness": 2,
+            "max_expansions": 100
+          }     
+        }
+    }
+}
+```
+
+### Ids Query
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+        "ids":{
+          "values": [53210,43187]
+        }     
+    }
+}
+```
+
+
+## 复合查询
+
+### 定值打分
+* 将查询匹配的文档的评分设为一个常值。 
+* query context 查询上下文
+    * 用在查询上下文中的字句查询的结果是：“这个文档有多匹配这个查询”。除了决定文档是否匹配，字句匹配的文档还会计算评分，来评定文档有多匹配，会参与相关性评分。查询上下文由 query 元素表示。
+* Filter context 过滤上下文
+    * 过滤上下文由 filter 元素或 bool 中的 must not 表示。用在过滤上下文中的字句查询的结果是：“这个文档是否匹配这个查询”，不参与相关性评分
+
+* 补充
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+        "constant_score": {
+            "filter": {
+                "term": { "play_name": "Henry IV" }
+            },
+            "boost": 1.5
+        }
+    }
+}
+```
+
+### 布尔查询
+Bool 查询用bool操作来组合多个查询字句为一个查询。
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+        "bool": {
+            "must": {
+               "term": { "text_entry": "dream" }
+            },
+            "must_not": {
+               "term": { "play_name": "night" }
+            },
+            "should": [
+                { "term": { "text_entry": "flight" } },
+                { "term": { "text_entry": "the" } }
+            ]
+        }
+    }
+}
+```
+
+### 函数打分
+* weight
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+        "function_score": {
+  	      "query": { "match_all": {} },
+  	      "boost": "5",
+  	      "functions": [{
+  	         "filter": { "match": {"text_entry": "dream"} },
+  		    "weight": 33
+  	      }],
+  	      "score_mode": "max",
+  	      "boost_mode": "multiply"
+	   }
+    }
+}
+```
+
+* random score
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+        "function_score": {
+	   "query": { "match_all": {} },
+	      "boost": "5",
+	      "functions": [{
+	        "filter": {
+            "match": {"text_entry": "dream"} },
+		    "weight": 33
+		 },
+         {
+		 "filter": {
+            "match": {"text_entry": "flight"} },
+		    "random_score": {},
+		    "weight": 3
+         }
+          ],
+	      "score_mode": "min",
+	      "boost_mode": "multiply"
+        }
+    }
+}
+```
+
+* filed value factor
+```shell script
+GET /shakespeare/_search
+{
+    "query": {
+        "function_score": {
+            "field_value_factor": {
+                "field": "speech_number",
+                "factor": 1.2,
+                "modifier": "sqrt",
+                "missing": 1
+            }
+        }
+    }
+}
+
+```
+
+* 衰减函数
+    * 以某个字段值为标准，离标准值越近的分值越高
+```shell script
+# 仅供示例，不能运行
+GET /shakespeare/_search
+{
+    "query": {
+       "function_score": {
+          "gauss": {
+              "date": {
+                "origin": "2019-11-25",
+                "offset": "5d",
+                "scale": "10d",
+                "decay": 0.5
+              }
+          }
+      }
+   }
+}
+```
+* script score
+```shell script
+GET /shakespeare/_search
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "match": {
+          "text_entry": "flight dream"
+        }
+      },
+      "script_score": {
+        "script": {
+          "source": "Math.log(1+doc.line_id.value)"
+        }
+      }
+    }
+  }
+}
+```
+
+* boosting query
+    * 用于给定查询匹配的结果有效降级（降低的相关度，将它们的排序更靠后）。与布尔查询中的“ NOT”子句不同的是，它仍会返回包含词的文档，但会降低其总体得分。
+    * Boosting查询接受一个positive子查询和一个negative子查询。只有匹配了positive查询的文档才会被包含到结果集中，但是同时匹配了negative查询的文档会被降低其相关度，通过将文档原本的_score和negative_boost参数进行相乘来得到新的_score。
+    * 因此，negative_boost参数必须小于1.0。在上面的例子中，任何包含了指定负面词条的文档的\_score都会是其原本_score的0.3
+
+
+```shell script
+GET /shakespeare/_search
+{
+  "query": {
+    "boosting": {
+      "positive": {
+        "match": {
+          "text_entry": "flight"
+        }
+      },
+      "negative": {
+        "match": {
+          "text_entry": "dream"
+        }
+      },
+      "negative_boost": 0.3
+    }
+  }
+}
+```
+
+## 关联查询
+* join 不建议使用，谨慎使用
+* 各种join相关的示例没有进行查询
+
+
+
+
+
+## elasticsearch 脚本
+
+```shell script
+GET /shakespeare/_search
+{
+  "script_fields": {
+    "my_field": {
+      "script": {
+        "lang": "painless",
+        "source": "doc.line_id.value * params.value",
+        "params": {
+          "value": 2
+        }
+      }
+    }
+  }
+}
+
+# 创建脚本
+POST /_scripts/my_score
+{
+  "script": {
+    "lang": "painless",
+    "source": "doc.line_id.value * params.value"
+  }
+}
+# 查看脚本
+GET /_scripts/my_score
+
+```
+
+
+
+
+
+### es特定查询
+
+
+## es 聚合查询
+
+
+
+
+### 指标聚合
+```shell script+
+
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "avg_agg": {
+      "avg": {
+        "field": "balance"
+      }
+    }
+  }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

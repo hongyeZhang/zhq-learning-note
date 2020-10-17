@@ -6,8 +6,6 @@
     * https://zhuanlan.zhihu.com/p/135939591
 
 
-
-
 ## 前言
 * word学习笔记见文件夹
 * 学习版本：5.6版本
@@ -74,9 +72,7 @@ curl -X GET http://localhost:9200/_cat/health?format=yaml
     - 悬浮
     - 冲停
 
-
 ## chapter2 Rest API
-
 * 颜色状态
     * yellow 所有分片正常分布，但是副本缺失 
     * red 
@@ -948,10 +944,7 @@ curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_searc
     * decay(衰减值)
 * script_score  通过自定义脚本计算分值。
 
-
-
 ```shell script
-
 curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
 {
   "query": {
@@ -975,17 +968,6 @@ curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_searc
     }
   }
 }'
-
-
-
-
-
-
-
-
-
-
-
 ```
 
 ### Boosting Query
@@ -994,14 +976,20 @@ curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_searc
 
 ### 关联查询
 * join 一般不建议使用，谨慎使用
-
 * 路由  
     * 索引路由(index)
     * 搜索路由(search)
-
+* 在Elasticsearch这种分布式系统中执行完整的SQL风格的Join查询代价非常高。
+* 要在Elasticsearch中实现关联查询，我们需要借助Elasticsearch的一个特殊字段类型：Join类型。
+* Join数据类型是一个特殊字段，可在相同索引的文档中创建父/子关系。关系部分在文档中定义了一组可能的关系，每个关系都是父名称和子名称。
+* 关联查询的约束条件：
+    * 每个索引只允许一个连接字段（join）类型
+    * 父文档和子文档必须处在同一个分片上建立索引。
+    * 一个元素可以有多个子级，但只能有一个父级。
+    * 可以向已有连接字段类型（join）添加新新关系。也可以将子元素添加到现有的元素中，前提是该元素已经是父元素。
 
 ### 特定查询
-* MLT Query (mor like this)  查询与给定文档相似的文档
+#### MLT Query (more like this)  查询与给定文档相似的文档
 查询与给定文档“相似”的文档。如：查询所有商品中“标题”和“描述”字段中都包含类似于“xxxx”的文字，并将Term的数量限制为5个：
 ```shell script
 curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_search?pretty -d'
@@ -1046,15 +1034,13 @@ curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_searc
   }
 }'
 ```
-
-
 MLT的工作原理：假如想查找与给定输入文档相似的所有文档，那么可以肯定的是：输入文档本身应该是该类型查询的最佳匹配。根据Lucene评分公式，输入文档中tf-idf最高的术语可以很好地代表该文档。MLT查询所做的是仅从输入文档中提取文本，然后选择tf-idf最高的前K个词构成查询。
 要使用MLT，涉及的字段必须建立索引，并且其类型为text或keyword。另外，当对文档使用like时，必须启用_source，或必须为stored，或存储term_vector。
 为了加快查询速度，可以在索引时指定term_vector是否存储
 
 
-* Script Query
-* 该查询允许脚本充当过滤器，通常是在过滤上下文中使用：
+#### Script Query
+* 该查询允许脚本充当过滤器，通常是在过滤上下文中使用
     * query context 有打分
     * filter context 无打分，被缓存
 ```shell script
@@ -1097,20 +1083,15 @@ curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_searc
 }'
 
 ```
-
-
-
-
 * Template Query(6.X版本之上就不存在了)
 
 ## chapter8 Elasticsearch 脚本
-### elasticsearch 表达式
+### elasticsearch表达式
 * 使用脚本，可以在Elasticsearch中评估自定义表达式。例如，可以使用脚本来返回“脚本字段”作为搜索请求的一部分，或者评估查询的自定义分数。“painless
-”为默认的脚本语言。painless、expression为Elasticsearch内置支持。
-在Elasticsearch API中使用脚本都遵循相同的格式：
+    ”为默认的脚本语言。painless、expression为Elasticsearch内置支持。在Elasticsearch API中使用脚本都遵循相同的格式：
 * 5.x版本支持groovy、javascript、python、java等语言，javasript、python需要安装模块支持。
 * 6.x版本增加了mustach内置支持，取消groovy、javascript、python支持，java需要自己写插件进行支持。
-
+* painless和expression是默认内置的脚本表达式。painless是默认的脚本语言。
 
 ```shell script
 "script": {
@@ -1192,30 +1173,51 @@ curl -XGET -H "Content-Type: application/json" localhost:9200/shakespeare/_searc
     * 距离函数：                     haversin
     * 其他功能：                     min  max
 
-
-
 ### lucene 表达式
+Lucene表达式把javascript编译成字节码。主要使用目的：高性能自定义排名和排序而设计。
+Lucene表达式支持Javascript语法的子集，是使用基于JavaScript的语法指定的表达式。可以使用以下方式构造表达式：
+
+	整数，浮点数，十六进制和八进制文本
+	算术运算符：+ - * / %   | & ^ ~ << >> >>>
+	布尔和三元运算符：       && || ! ?:
+	比较运算符:                    < <= == >= >
+
+
+
+
+
+
+
 ### Painless 表达式
 
 
 
 ## chapter9 Elasticsearch 插件
+* x-pack
+* elastic sql
+
+* 安装插件
+    * 在线安装  ./elasticsearch-plugin install x-pack
+    * 离线安装  下载离线安装包并安装  ./elasticsearch-plugin install file://path/to/x-apck
+
+
 ### X-Pack 插件
-安全
-审计
-监控 ==> 收集 ==> kibana
-告警 ==> email
+* 安全
+* 审计
+* 监控 ==> 收集 ==> kibana
+* 告警 ==> email
 
-X-Pack是一个Elastic Stack(ELK)扩展
-安装要找到与ES对应的版本，但是7.0之后，默认会安装X-Pack
+X-Pack是一个Elastic Stack扩展，将安全性，警报，监控，报告，机器学习和图形功能捆绑到一个易于安装的软件包中。要使用X-Pack，必须在Elasticsearch中
+安装与Elasticsearch版本相匹配的X-Pack。如果在群集上首次安装X-Pack，则必须执行完整群集重新启动。安装X-Pack后，必须在群集中的所有节点上启用安全性和安全性才能使群集正常运行。
 
+X-Pack是一个Elastic Stack(ELK)扩展。安装要找到与ES对应的版本，但是7.0之后，默认会安装X-Pack
 配置文件写在 elasticsearch.yml中
 
 
-账户和密码
-elastic/changeme
-kibana/changeme
-logstash-system/changeme
+* 账户和密码
+* elastic/changeme
+* kibana/changeme
+* logstash-system/changeme
 
 * 开启xpack和设置用户名密码
 ```shell script
@@ -1233,23 +1235,21 @@ bin/elasticsearch-setup-passwords interactive
 [remote_monitoring_user]
 [elastic]
 
-
 开启安全认证之后的查询方式
 curl -XGET -u elastic:123456 localhost:9200/_cat/indices?pretty
 curl -XGET -u elastic:123456 localhost:9200/.security-7?pretty
-
-
-
 ```
-* 安全设置
-    * 字段(field)级别的安全和文档(document)级别的安全
-    * 各种参数设置
-* 监控设置
-    * 定义怎样搜集数据 
-* 审核设置
-    * 
-* 告警设置
-    * 注意必须打开监控
+
+* 插件配置
+    * 安全设置
+        * 字段(field)级别的安全和文档(document)级别的安全
+        * 各种参数设置
+    * 监控设置
+        * 定义怎样搜集数据 
+    * 审核设置
+        * 
+    * 告警设置
+        * 注意必须打开监控
 
 * 本地导出器
 * HTTP导出器
@@ -1372,14 +1372,9 @@ curl -XGET -u elastic:123456 localhost:9200/_xpack/security/role_mapping?pretty
 ### Elastic SQL
 * Elasticsearch SQL是一个X-Pack组件，它允许针对Elasticsearch实时执行类似SQL的查询。无论使用REST接口，命令行还是JDBC，任何客户端都可以使用SQ
 搜索或聚合数据。可以将Elasticsearch SQL看作是一种翻译器，它可以将SQL解释成Elasticsearch可以理解的查询语言，并利用Elasticsearch完成大规模读取和处理数据。
-
-
 ```shell script
 curl -XPOST -H "Content-Type:application/json" -u elastic:123456 localhost:9200/_sql?pretty -d'{"query":"select * from shakespeare"}'
 ```
-
- 
-
 
 
 ## chapter10 聚合
@@ -1395,7 +1390,6 @@ curl -XPOST -H "Content-Type:application/json" -u elastic:123456 localhost:9200/
     * 矩阵聚合（Matrix）
     * 管道聚合（Pipeline）
 
-
 * 指标聚合 该聚合是根据要聚合的文档提取出来字段值来进行指标计算。
     * 平均值（avg）
 
@@ -1404,7 +1398,7 @@ curl -XPOST -H "Content-Type:application/json" -u elastic:123456 localhost:9200/
 curl -H "Content-Type: application/json" -XPOST -u elastic:123456 localhost:9200/people/bank/_bulk?pretty --data-binary @accounts.json
 
 #平均值聚合(avg)
-curl  -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?pretty&size=0" -d'
+curl  -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/bank/_search?pretty&size=0" -d'
 {
   "aggs": {
     "avg_agg": {

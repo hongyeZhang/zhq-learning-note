@@ -1,8 +1,9 @@
 {
-  "query": {
-    "multi_match": {
-      "query": "dream flight",
-      "fields": ["text_entry", "play_name"]
+  "aggs": {
+    "avg_agg": {
+      "avg": {
+        "field": "balance"
+      }
     }
   }
 }
