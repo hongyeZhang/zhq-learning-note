@@ -1533,18 +1533,21 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" -XPOST "localh
     }
   }
 }'
+# 指定  HDR 直方图
+
 
 #基数聚合 cardinality
-
-
-
 
 
 ```
 * 基数聚合
     * 单值指标聚合，用于计算不同值的近似计数。它提供一个字段的基数，即该字段的 distinct 或者 unique 值的数目。可以以如下SQL来帮助理解该聚合：
-* 每天访问网站的独立IP有多少 bitmap(位图算法)  
-    * hyperLogLog
+    * cardinality
+    * SELECT COUNT(DISTINCT age) FROM account
+    * 去重是一个很常见的操作，可以应用于很多的业务场景：
+        * 每天访问网站的独立IP有多少 bitmap(位图算法)  
+        * hyperLogLog  实现的原理
+* text 类型不能聚合
  
 ```shell script
 curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?pretty&size=0" -d'
@@ -1559,7 +1562,13 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:920
 }'
 ```
 
-* Top聚合 
+* Top聚合
+    * top_hits聚合可以有效地用于通过桶聚合器按某些字段对结果集进行分组。该聚合器主要用作子聚合，以便可以按存储分区汇总最匹配的文档。它有3个重要的参数：
+        * from    获取数据的偏移量
+        * size     每个桶要返回的最大数量
+        * sort     如何排序。默认情况下，按分数排序
+
+ 
 
 ```shell script
 curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty=true" -d'
@@ -1598,9 +1607,12 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:920
 ```
 
 #### 分桶聚合
-桶聚合不像指标聚合那样计算字段的值，而是创建文档存储桶。每个桶都与一个标准/查询（取决于聚合类型）相关联，该标准/查询确定文档是否“落入”其中，存储桶有效地定义了文档集。除了存储桶本身之外，桶聚合还计算并返回“落入”每个存储桶的文档数量。
+桶聚合不像指标聚合那样计算字段的值，而是创建文档存储桶。每个桶都与一个标准/查询（取决于聚合类型）相关联，该标准/查询确定文档是否“落入”其中，存储桶有效地定义了文档集。
+除了存储桶本身之外，桶聚合还计算并返回“落入”每个存储桶的文档数量。
 
 * 过滤聚合
+    * 返回当前文档集中与指定过滤器匹配的文档的单个桶。通常，用于将当前聚合的文档再进一步缩小到一组特定的文档。
+    
 ```shell script
 curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty=true" -d'
 {
@@ -1621,11 +1633,6 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:920
     }
   }
 }'
-
-
-
-
-
 ```
 
 * 多过滤聚合（filters）
@@ -1682,6 +1689,8 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:920
 ```
  
 * 范围聚合
+    * 基于多桶的聚合，使用户能够定义一组范围，每个范围代表一个桶。在汇总过程中，将按每个范围检查每个文档中提取的值，并“存储”相关/匹配的文档。
+    请注意，此聚合包括起始值，但不包括每个范围的起始值。
 ```shell script
 # 范围聚合
 curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
@@ -1741,9 +1750,6 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:920
 
 ```
 * 日期范围聚合
-
-
-
 ```shell script
 curl -XPOST localhost:9200/logstash-*/_search?size=0 -d'
 {
@@ -1781,7 +1787,6 @@ curl -XPOST "localhost:9200/logstash-*/_search?size=0&pretty" -d'
 }'
 
 ```
-
 ● interval
 时间间隔。可用表达式：year, quarter, month, week, day, hour, minute, second
 ● key
@@ -1791,12 +1796,13 @@ offset参数用于按指定的正（+）或负偏移（-）更改每个存储区
 
 
 * 地理距离聚合(geo_distance)
-    * 适用于geo_point
+    * 适用于 geo_point
     字段的多桶聚合，在概念上与范围聚合非常相似。用户可以定义一个原点和一组距离范围。聚合会评估每个文档值到原点的距离，并根据范围来确定它所属的桶（如果文档和原点之间的距离在存储桶的距离范围内，则文档属于存储桶）。
     * 默认情况下，距离单位为m（米），但也可以设置为：mi（英里），in（英寸），yd（码），km（公里），cm（厘米），mm（毫米）。
 
 * 该聚合有两种距离计算模式：弧（arc，默认）和平面（plane）。弧计算是最准确的。平面最快但最不准确。当搜索跨越较小的地理区域（约5
 公里）时，请考虑使用平面。如果在非常大的区域内进行搜索（例如跨大陆搜索），平面将返回较高的误差范围。
+* 获得最近几公里最近的餐厅等
 
 ```shell script
 curl -XPOST "localhost:9200/restaurants/_search?size=0&pretty" -d'
@@ -1886,17 +1892,15 @@ curl -XPOST "localhost:9200/restaurants/_search?size=0&pretty" -d'
       }
    }
 }'
-
-
-
-
 ```
 
-* 词项聚合（terms）
-
-
+### 词项聚合（terms）
+* 聚合
+    * 多指标聚合，根据索引库中的文档动态构建桶。基于词项的聚合，如果聚合字段是text的话，会对一个一个的词根进行聚合基于多桶的聚合，每个桶一个对应一个唯一值。
+    * 默认情况下，词项聚合将返回doc_count排序的前十个词项的存储桶。可以通过设置size参数来更改此默认行为。
 * 排序
-可以通过设置Order参数来设置桶的顺序。默认情况下，桶会按照doc_count降序排列。不建议按_count升序或按子聚合排序，因为这会增加文档计数上的错误。
+    * 可以通过设置Order参数来设置桶的顺序。默认情况下，桶会按照doc_count降序排列。
+    * 不建议按_count升序或按子聚合排序，因为这会增加文档计数上的错误。
 ```shell script
 curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
 {
@@ -1921,7 +1925,8 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:920
 
 ```
 * 过滤
-对桶进行过滤。可以设置include和exclude参数来完成，参数接受正则表达式或精确值数组。此外，include子句还可以使用分区表达式。
+    * 对桶进行过滤。可以设置include和exclude参数来完成，参数接受正则表达式或精确值数组。此外，include子句还可以使用分区表达式。
+    * include 可以正则表达式匹配，也可以精确匹配
 ```shell script
 # 使用include和exclude进行过滤
 curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
@@ -1984,7 +1989,8 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:920
 ```
 
 * 搜集模式
-对于具有许多唯一术语和少量所需结果的字段，将子聚合的计算延迟到最上层父级aggs被聚合之前，可能会更有效。通常，聚合树的所有分支都以深度优先的方式进行扩展，然后才进行修剪。在某些情况下，这可能非常浪费，并且会遇到内存限制。如：在电影数据库中查询10个最受欢迎的演员及其5个最常见的联合主演：
+对于具有许多唯一术语和少量所需结果的字段，将子聚合的计算延迟到最上层父级aggs被聚合之前，可能会更有效。通常，聚合树的所有分支都以深度优先的方式进行扩展，然后才进行修剪。
+在某些情况下，这可能非常浪费，并且会遇到内存限制。如：在电影数据库中查询10个最受欢迎的演员及其5个最常见的联合主演：
 ```shell script
 curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:9200/people/_search?size=0&pretty" -d'
 {
@@ -2007,6 +2013,35 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:920
   }
 }'
 ```
+
+### 管道聚合
+* 管道聚合主要目的是将信息添加到输出树中，而不是文档集所产生的输出。管道聚合有很多不同的类型，每种类型都与其他聚合计算不同的信息，但是可以将这些类型分为两类：
+    * Parent：将新计算的桶或聚合添加到现有桶中。
+    * Sibling：同级聚合的输出提供的管道聚合，并且能够计算与该同级聚合处于同一级别的新聚合
+* 大多数管道聚合需要另一个聚合作为其输入。输入聚合是通过buckets_path参数定义的，该参数遵循特定格式：
+* 管道聚合没有子聚合功能，但是根据其类型，可以引用buckets_path中的另一个管道，从而可以链接管道聚合。
+
+* 平均值聚合
+* 桶脚本聚合
+
+## es杂项
+
+### spring 与 es 整合
+
+* TransportClient 从7.0开始就已经被废弃了
+* elastic search rest client  
+* elastic High level REST Client 推荐使用，官方提供的
+* SpringDataElasticsearch
+    * ElasticsearchTemplate
+    * ElasticsearchRepository
+
+* 分页
+* 排序
+* 深度分页问题
+    * max_result_window 默认禁止深度分页
+    * es 本不应该做深度分页
+    * scroll 滚动查询，针对大规模数据集，会返回一个 scroll_id
+    * mysql 用 limit 进行深度分页效果非常差，要通过 order by id 进行优化深分页问题
     
 
 
@@ -2015,28 +2050,8 @@ curl -XPOST -u elastic:123456 -H "Content-Type: application/json" "localhost:920
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### 基本概念
-
-
-
-## 插件安装
+## es插件
+### 插件安装
 第一种：命令行
 
     bin/elasticsearch-plugin install [plugin_name] elasticsearch-head
@@ -2066,16 +2081,7 @@ bin/elasticsearch-plugin install [plugin_name]
 
 ## 可视化
 ElasticSearch的可视化工具有很多，比如elasticsearch-head、Dejavu、ElasticHD等。
-
 查看es可视化工具建议用kibana或者cerebro
-
-
-
-
-
-
-
-
 
 ## 版本采坑记录
 

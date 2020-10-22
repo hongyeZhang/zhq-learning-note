@@ -1217,7 +1217,497 @@ POST /bank/_search?size=0
     }
   }
 }
+
+# 根据脚本进行平均值聚合
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "avg_agg": {
+      "avg": {
+        "script": {
+          "source": "doc.balance.value"
+        }
+      }
+    }
+  }
+}
+
+# 最大值聚合
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "max_agg": {
+      "max": {
+        "field": "balance"
+      }
+    }
+  }
+}
+
+# 求和聚合
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "sum_agg": {
+      "sum": {
+        "field": "balance"
+      }
+    }
+  }
+}
+
+# 最小值聚合
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "min_agg": {
+      "min": {
+        "field": "balance"
+      }
+    }
+  }
+}
+
+# 地理位置聚合 (geo_bounds)
+# 存放的数据类型为 geo_point
+POST /bank/_search?size=0
+{
+  "query": {
+    "match": {
+      "name": "restaurant"
+    }
+  },
+  "aggs": {
+    "geo_restaurant": {
+      "geo_bounds": {
+        "field": "location"
+      }
+    }
+  }
+}
+
+
+# 地理中心
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "geo_restaurant": {
+      "geo_centroid": {
+        "field": "location"
+      }
+    }
+  }
+}
+
+# 百分比统计
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "age_outlier": {
+      "percentiles": {
+        "field": "age"
+      }
+    }
+  }
+}
+
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "age_outlier": {
+      "percentiles": {
+        "field": "age",
+        "percents": [
+          90,
+          95,
+          99
+        ]
+      }
+    }
+  }
+}
+
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "name_count": {
+      "cardinality": {
+        "field": "firstname.keyword"
+      }
+    }
+  }
+}
 ```
+
+### top聚合
+```shell script
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "top_tags": {
+      "terms": {
+        "field": "lastname.keyword",
+        "size": 6
+      },
+      "aggs": {
+        "top_balance_hits": {
+          "top_hits": {
+            "sort": [
+              {
+                "balance": {
+                  "order": "desc"
+                }
+              }
+            ],
+            "_source": {
+              "includes": [
+                "firstname",
+                "lastname",
+                "age",
+                "balance"
+              ]
+            },
+            "size": 1
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+### 分桶聚合
+
+
+```shell script
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "gender_filter": {
+      "filter": {
+        "term": {
+          "gender.keyword": "M"
+        }
+      },
+      "aggs": {
+        "balance_price": {
+          "avg": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  }
+}
+
+# 多过滤聚合
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "bank_filter": {
+      "filters": {
+        "filters": {
+          "state": {
+            "match": {
+              "state.keyword": "AZ"
+            }
+          },
+          "name": {
+            "match": {
+              "lastname.keyword": "Hess"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+# 将未命中的文档统一归为 other_bucket 通过参数控制其是否显示
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "bank_filter": {
+      "filters": {
+        "other_bucket": true,
+        "filters": {
+          "state": {
+            "match": {
+              "state.keyword": "AZ"
+            }
+          },
+          "name": {
+            "match": {
+              "lastname.keyword": "Hess"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "age_range": {
+      "range": {
+        "field": "age",
+        "ranges": [
+          {
+            "to": 30
+          },
+          {
+            "from": 20,
+            "to": 25
+          },
+          {
+            "from": 40
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "age_range": {
+      "range": {
+        "field": "age",
+        "ranges": [
+          {
+            "to": 30
+          },
+          {
+            "from": 20,
+            "to": 25
+          },
+          {
+            "from": 40
+          }
+        ]
+      },
+      "aggs": {
+        "balance_max": {
+          "max": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
+
+```
+
+
+### 日期范围聚合
+```shell script
+
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "age_range": {
+      "date_range": {
+        "field": "utc_time",
+        "format": "yyyy-MM",
+        "ranges": [
+          {
+            "to": "now+10M"
+          },
+          {
+            "from": "now-10M"
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+
+```
+
+### 日期直方图聚合（date_histogram）
+
+```shell script
+#! Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval] in the future.
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "utc_time_agg": {
+      "date_histogram": {
+        "field": "utc_time",
+        "interval": "day",
+        "format": "yyyy-MM-dd",
+        "offset": "+6h"
+      }
+    }
+  }
+}
+
+```
+
+
+### 词项聚合
+
+
+```shell script
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "firstname.keyword",
+        "size": 3
+      }
+    }
+  }
+}
+
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "firstname.keyword",
+        "order": {
+          "_key": "desc"
+        }
+      }
+    }
+  }
+}
+
+
+# select max(balance) as max_balance group by firstname order by max_balance 
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "firstname.keyword",
+        "order": {
+          "_key": "desc"
+        }
+      },
+      "aggs": {
+        "max_balance": {
+          "max": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  }
+}
+
+# 过滤
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "address.keyword",
+        "include": ".*Gatling.*",
+        "exclude": ".*Street"
+      }
+    }
+  }
+}
+
+
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "address.keyword",
+        "include": [
+          "105 Onderdonk Avenue",
+          "Street"
+        ]
+      }
+    }
+  }
+}
+
+
+# 分区过滤
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "account_number",
+        "include": {
+          "partition": 0,
+          "num_partitions": 20
+        },
+        "size": 20,
+        "order": {
+          "max_balance": "desc"
+        }
+      },
+      "aggs": {
+        "max_balance": {
+          "max": {
+            "field": "balance"
+          }
+        }
+      }
+    }
+  }
+}
+
+# 搜集模式
+POST /bank/_search?size=0
+{
+  "aggs": {
+    "name_agg": {
+      "terms": {
+        "field": "firstname.keyword",
+        "size": 10,
+        "collect_mode": "breadth_first"
+      },
+      "aggs": {
+        "tops": {
+          "terms": {
+            "field": "firstname.keyword",
+            "size": 5
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

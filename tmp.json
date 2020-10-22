@@ -1,8 +1,18 @@
 {
   "aggs": {
-    "avg_agg": {
-      "avg": {
-        "field": "balance"
+    "name_agg": {
+      "terms": {
+        "field": "firstname.keyword",
+        "order": {
+          "_term": "desc"
+        }
+      },
+      "aggs": {
+        "max_balance": {
+          "max": {
+            "field": "balance"
+          }
+        }
       }
     }
   }
