@@ -1,6 +1,68 @@
 # Linux 常用命令
 
 
+## 参考资料
+* https://www.runoob.com/linux/linux-comm-useradd.html
+
+
+
+## 用户操作
+```shell script
+
+添加用户: useradd -m 用户名
+设置密码: passwd 用户名
+删除用户: userdel -r 用户名
+
+# 列出系统中所有的用户名
+awk -F':' '{ print $1}' /etc/passwd
+
+# /etc/passwd是一个文本文件，其中包含了登录 Linux 系统所必需的每个用户的信息。
+# 它保存用户的有用信息，如用户名、密码、用户 ID、群组 ID、用户 ID 信息、用户的家目录和 Shell 
+cat /etc/passwd
+compgen -u
+
+
+#查看用户组
+cat /etc/group      
+
+# 退出当前用户
+ctrl + D 
+
+useradd -d /home/hadoop hadoop
+
+useradd username -m -s /bin/bash -d /home/username -g groupname
+
+# 创建新用户，默认创建一个同名的用户组
+useradd hadoop -m -s /bin/bash -d /home/hadoop 
+# 给新加的用户添加权限
+su -l hadoop
+
+
+# 查看主机相关的信息
+cat /etc/hosts
+
+
+
+
+
+
+
+```
+
+
+### 防火墙
+```shell script
+# 查看服务器上是否安装了firewall
+systemctl status firewalld
+
+
+```
+
+
+
+
+
+
 ### 帮助查看
 * 内部命令与外部命令
     - 在linux系统中有存储位置的命令为外部命令；
@@ -15,7 +77,7 @@
     - man rm                 //常用写法
     - man passwd
 
-```shell
+```shell script
 [root@localhost ~]# type help    //查看help命令的内外类型
 help is a shell builtin        //可以看到help为内部命令
 [root@localhost ~]# type passwd    //查看passwd这条命令是否在linux系统中存在
