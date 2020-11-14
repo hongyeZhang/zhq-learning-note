@@ -1,4 +1,5 @@
 
+# Hive 学习笔记
 
 ## chapter1-1 数据管理和数据仓库
 
@@ -31,3 +32,8 @@
 ### 什么是Hive
 * Hive的优点是学习成本低，可以通过类似SQL语句实现快速MapReduce统计，使MapReduce变得更加简单，而不必开发专门的MapReduce应用程序。hive十分适合对数据仓库进行统计分析
 * 将SQL 转化为 MapReduce 的任务
+
+
+
+
+

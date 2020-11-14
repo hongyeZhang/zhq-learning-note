@@ -195,10 +195,28 @@ hdfs dfs -cat /out/paymentOut/part-r-00000
 * 数据就近计算，节省网络开销
 * 一个块 128M
 
+* reduce 本质是多路归并，执行外排序
+
+* map join
+* 
+
+
+
+## Yarn
+* 资源管理，任务调度
+* 动态上线，动态下线
 
 
 
 
+## 其他
+* 更简单的安装方式  ambari
+
+
+
+
+
+ 
 
 
 
