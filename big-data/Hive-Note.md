@@ -177,6 +177,9 @@ select * from books where location='beijing' and year = '1990';
 
 ```
 
+## chapter3 DML
+
+
 * 批量插入数据
 ```shell script
 from books
@@ -227,6 +230,300 @@ insert into table bucket_books select id, name from books;
 select * from bucket_books;
 select * from books cluster by id;
 ```
+
+
+### 数据采样
+```shell script
+# 数据采样
+select * from books tablesample(10 percent);
+select * from books tablesample(3 rows);
+select * from books tablesample(bucket 2 out of 4 on id);
+```
+
+### DML语句
+```shell script
+# 全局排序
+select * from books order by id;   
+# 
+select * from books distribute by id;
+# 局部排序，全局乱序
+select * from books sort by id;
+# 
+select * from books cluster by id;
+
+set mapreduce.job.reduces;
+
+
+# 单条插入
+
+# 多条插入
+
+```
+
+
+```shell script
+
+load data [local] inpath 'filepath' [overwrite] into table_name [patition(part_col=val, part_col=val, ...)]
+
+# 载入数据
+load data inpath '/home/books' into table books;
+
+```
+
+* order by 全局排序
+* sort by 局部排序，全局乱序
+* distribute by 根据字段进行 hashcode 取模后分配到相应的 reduce。类似分桶，只分不排序
+* cluster by  = distribute by + sort by
+
+* 支持的操作
+    * union \ union all \ like \ case when \ having \ group by \ order by \ in \ exists
+    * semi join 
+
+
+## chapter4 DDL和复杂类型
+* load 装载数据时，不做数据检查， insert 做数据检查
+* MANAGED TABLE 内部表
+* EXTERNAL TABLE 外部表
+
+````shell script
+# 内部表转外部表
+alter table table_name set tblproperties('EXTERNAL'='TRUE');
+# 更改表名字
+alter table table_name rename to table_name_new;
+# 更改字段
+
+# 添加字段 add 关键字
+alter table table_name add columns(col_name data_type);
+
+# 字段更改， change关键字
+alter table table_name change old_column new_column new_data_type;
+# 字段删除  replace 关键字
+alter table table_name replace columns(col_name data_type, col_name data_type);
+
+show partitions part_books;
+# 添加分区
+alter table part_books add partition(location='shenzhen', year='1990');
+# 修改分区
+alter table table_name partition(col_name=val, col_name=val) rename to partition(col_name=val1, col_name=val2);
+# 删除分区
+alter table table_name drop partition(col_name=val, col_name=val);
+
+
+
+````
+
+* hcatalog 元数据管理
+
+
+### 删除表
+```shell script
+drop table table_name;
+truncate table table_name;
+```
+
+### 查看表
+```shell script
+desc table_name;
+desc formatted table_name;
+desc extend table_name;
+show partitions table_name;
+
+```
+
+### 视图
+````shell script
+create view books_view as select id, name, year from books;
+select * from books_view;
+
+create view books_group as select id from books group by id;
+
+````
+
+### 复杂类型 array
+```shell script
+create table t_array(id int, name string, location string, years array<int>)
+row format delimited fields terminated by ','
+collection items terminated by ':';
+
+load data inpath '/input/txt_array.txt' into table t_array;
+select id, name, location, concat(years[0], '-', years[1]) from t_array;
+``` 
+
+### 复杂类型 struct
+```shell script
+create table t_struct(id int, name string, inf struct<location:string, year:int>)
+row format delimited fields terminated by ','
+collection items terminated by ':';
+
+load data inpath '/input/txt_struct.txt' into table t_struct;
+select id, name, inf.location, inf.year from t_struct;
+``` 
+
+### 复杂类型 Map
+```shell script
+create table t_map(id int, name string, location string, inf map<string, string>)
+row format delimited fields terminated by '\t'
+collection items terminated by ','
+map keys terminated by ':';
+
+load data inpath '/input/txt_map.txt' into table t_map;
+select id, name, location, concat(inf['from'],'-',inf['to'],inf['job']) from t_map;
+``` 
+
+
+## chapter5 Hive的存储和压缩
+### fetch机制
+* hive.fetch.task.conversation 关键参数，none\minimal\more
+    * none 所有的任务执行 mapreduce
+    * minimal select * , filter on partition column(where and having), limit only 不用执行mapreduce
+    * more （0.14之后的默认值）  select, filter, limit only 
+
+### join
+* 内连接
+```shell script
+select t1.*, t2.* from t1 left outer join t2 on t1.id = t2.id;
+select t1.*, t2.* from t1 right outer join t2 on t1.id = t2.id;
+select t1.*, t2.* from t1 full outer join t2 on t1.id = t2.id;
+select * from person left semi join person_detail on person.id = person_detail.id;
+```
+* 外连接
+* 全外连接
+
+* 半连接
+    * 最早是因为 hive不支持 in exist
+    * 在map端过滤了一些无效的数据，大大节省网络IO，减少reduce shuffle 的时间
+```shell script
+create table person(id int, name string) row format delimited fields terminated by ',';
+create table person_detail(id int, email string, qq string, address string) row format delimited fields terminated by ',';
+
+insert into person(id, name) values (1, 'james');
+insert into person_detail(id, name, qq, address) values (1, 'james', '123456','street');
+select * from person left semi join person_detail on person.id=person_detail.id;
+```
+* 内连接：指连接结果bai仅包含符合连接条件du的行，参与连接的两个表zhi都应该符合连接条件。dao
+* 外连接：连接结果不仅包含符合连接条件的行同时也包含自身不符合条件的行。包括左外连接、右外连接和全外连接。
+* 左外连接：左边表数据行全部保留，右边表保留符合连接条件的行。
+* 右外连接：右边表数据行全部保留，左边表保留符合连接条件的行。
+* 全外连接：左外连接 union 右外连接。
+
+### 存储方式
+#### 行式存储
+* 相关的字段数据保存在一起，一行数据就是一条记录
+* 方便进行DML操作
+* 每列数据类型不一致，不容易获得较高的压缩比，空间利用率低
+#### 列式存储
+* 查询时，只有涉及到的列才会被读取，不会将所有的列读取出来，可以跳过不需要的列
+* 获得较高的压缩比，可以节省存储空间
+* 不适合扫描比较小的数据量
+
+
+
+```shell script
+create table t_sequence(id int, name string, address string)
+row format delimited fields terminated by ','
+stored as sequencefile;
+
+insert into t_sequence(id, name, address) select id, name, location from books;
+
+# 查看导入的数据
+hdfs dfs -cat /hive/warehouse/zhq_test_db.db/t_sequence/000000_0
+# 查看压缩的数据
+hdfs dfs -text /hive/warehouse/zhq_test_db.db/t_sequence/000000_0
+```
+
+### 压缩方式
+* hive.exec.compress.output    输出结果是否压缩
+* hive.exec.compress.intermediate   中间过程是否压缩
+
+## chapter6 hive内置和自定义函数
+
+```shell script
+# 查看所有的函数
+show functions;
+
+# 
+desc function trim;
+# 查看函数的简要信息
+desc function array;
+# 查看函数的详细信息
+desc function extended array;
+
+```
+* hive内置函数的分类
+    * 
+
+```shell script
+select array(1,2,3,4,5);
+select explode(array(1,2,3,4,5));
+
+# 实现wordcount
+select t.word, count(1) from (select explode(split(line, ' ')) word from word_sample) t group by t.word;
+
+```
+### 自定义函数
+
+
+
+
+
+
+## chapter7 hive事务和索引
+### hive事务表
+* 有9到10条的使用限制  桶表 orc文件
+
+
+
+### hive并发模式
+* hive.support.currency = true
+
+
+
+
+### TBL properties
+* 表属性，允许开发者定义一些自己的键值对信息
+
+```shell script
+# 创建一个不可变的表
+create table t_immu(id int, name string) row format delimited fields terminated by ',' tblproperties('immutable'='true');
+insert overwrite table t_immu select id, name from books; 
+show tblproperties immu;
+
+# 给一张表加上不可变的属性，加上之后这边表就无法变化
+alter table t_immu set tblproperties('immutable'='false');
+
+
+create table t_tbl_orc(id int, name string) row format delimited fields terminated by ',' stored as orcfile tblproperties('orc.compress'='SNAPPY');
+
+
+# 创建事务表
+create table t_transaction(id int, name string, location string, yeat int ) cluster by(id) into 4 buckets
+row format delimited fields terminated by ','
+stored as orcfile
+tblproperties('transactional'='true');
+
+# 允许的数据装载方式
+from books insert into t_transaction select id, name, location, year;
+# 不允许的数据装方式
+insert overwrite table t_transaction select id, name, location, year from books;
+load data inpath '/home/books.txt' into table t_transaction;
+show transaction;
+
+
+
+```
+
+* 一般数据仓库的开发不会使用事务表，只需要读取就行了
+
+
+
+
+
+
+
+## chapter8 hive 优化
+
+
+
 
 
 

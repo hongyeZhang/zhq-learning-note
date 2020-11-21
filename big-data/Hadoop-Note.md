@@ -102,6 +102,10 @@ hdfs dfs -copyFromLocal 源路径 路径
 # 将文件上传到 hadoop 的 /input 目录
 hdfs dfs -put payment.txt /input
 
+# 检查数据是否健康
+hdfs /fsck 
+
+hdfs dfsadmin -safemode get
 
 
 
