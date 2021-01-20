@@ -111,7 +111,7 @@ Spring 的主要作用就是为代码“解耦”，降低代码间的耦合度�
 * Spring 根据代码的功能特点，将降低耦合度的方式分为了两类：IoC 与 AOP。IoC 使得主业务在相互调用过程中，不用再自己维护关系了，即不用再自己创建要使用的对象了。而是由 Spring 容器统一管理，自动“注入”。而 AOP 使得系统级服务得到了最大复用，且不用再由程序员手工将系统级服务“混杂”到主业务逻辑中了，而是由 Spring 容器统一完成“织入”。
 * Spring 是于 2003 年兴起的一个轻量级的 Java 开发框架，它是为了解决企业应用开发的复杂性而创建的。Spring 的核心是控制反转（IoC）和面向切面编程（AOP）。简单来说，Spring 是一个分层的 Java SE/EE full-stack(一站式)轻量级开源框架
 
-![Spring体系结构](picture/liweimin/spring-overview.png)
+![Spring体系结构](../picture/liweimin/spring-overview.png)
 
 #### 非侵入式
 所谓非侵入式是指，Spring 框架的 API 不会在业务逻辑上出现，即业务逻辑是 POJO。由于业务逻辑中没有 Spring 的 API，所以业务逻辑可以从 Spring 框架快速的移植到其他框架， 即与环境无关。
@@ -310,7 +310,7 @@ Spring MVC 也叫 Spring Web MVC ，属于展示层框架。SpringMVC 是 Spring
 * 视图 (View)：负责渲染模型数据，一般来说它生成客户端浏览器可以解释 HTML 输出。
 * 控制器 (Controller)：负责处理用户请求并构建适当的模型，并将其传递给视图进行渲染
 
-![spring MVC 流程](picture/liweimin/springMvc.jpg)
+![spring MVC 流程](../picture/liweimin/springMvc.jpg)
 
 以下是对应于到 DispatcherServlet 的传入 HTTP 请求的事件顺序：
 * 在接收到 HTTP 请求后，DispatcherServlet 会查询 HandlerMapping 以调用相应的 Controller。

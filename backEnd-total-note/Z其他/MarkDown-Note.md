@@ -3,7 +3,7 @@
 ## markdown 记笔记实例
 
 #### 图片
-![图片1](picture/liweimin/test.png)
+![图片1](../picture/liweimin/test.png)
 
 
 #### 超链接
