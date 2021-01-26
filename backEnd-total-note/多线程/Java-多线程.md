@@ -1,8 +1,7 @@
+# Java多线程笔记
 
-# Java并发编程
-## Thread 
-
-### 6种状态
+## Thread
+### 6种线程状态
 * 1 NEW	新创建	还未调用 start() 方法；
 * 2 RUNNABLE	就绪的	调用了 start() ，此时线程已经准备好被执行，处于就绪队列；是活着的(alive)
     - 2 RUNNING	运行中	线程获得 CPU 资源，正在执行任务；活着的 (与上一种合并了)
@@ -11,242 +10,261 @@
 * 5 TIME_WAITING	超时等待	与 WAITING 的区别是可以在特定时间后自动返回；活着的
 * 6 TERMINATED	终止	执行完毕或者被其他线程杀死；不是活着的
 
+### 三种创建线程的方法
+* 1.2 实现Runnable接口(推荐)
+* 1.3 实现Callable接口
+* Java中，类仅支持单继承，如果一个类继承了Thread类，就无法再继承其它类，因此，如果一个类既要继承其它的类，又必须创建为一个线程，就可以使用实现Runable接口的方式。
+* 使用实现Runable接口的方式创建的线程可以处理同一资源，实现资源的共享。
+* 使用实现Callable接口的方式创建的线程，可以获取到线程执行的返回值、是否执行完成等信息。
 
-
-### Thread 主要方法
-### sleep()
-    Thread.sleep() 是一个静态方法：
-    public static native void sleep(long millis) throws InterruptedException;
-    使当前所在线程进入阻塞
-    只是让出 CPU ，并没有释放对象锁，也就是说如果当前线程持有对某个对象的锁，则即使调用sleep方法，其他线程也无法访问这个对象。
-    由于休眠时间结束后不一定会立即被 CPU 调度，因此线程休眠的时间可能大于传入参数
-    如果调用了sleep方法，必须捕获InterruptedException异常或者将该异常向上层抛出。如果被中断会抛出 InterruptedException
-    由于 sleep 是静态方法，它的作用时使当前所在线程阻塞。因此最好在线程内部直接调用 Thread.sleep()，如果你在主线程调用某个线程的 sleep() 方法，其实阻塞的是主线程！
-
-### yield()
-    // 这个方法没啥作用，一般不用
-    Thread. yield() 也是一个静态方法：
-    public static native void yield();
-    “Thread.yield() 表示暂停当前线程，让出 CPU 给优先级与当前线程相同，或者优先级比当前线程更高的就绪状态的线程。
-    它让掉当前线程 CPU 的时间片，使正在运行中的线程重新变成就绪状态，并重新竞争 CPU 的调度权。它可能会获取到，也有可能被其他线程获取到
-    和 sleep() 方法不同的是，它不会进入到阻塞状态，而是进入到就绪状态。
-    yield() 方法只是让当前线程暂停一下，重新进入就绪的线程池中。
-    它跟sleep方法类似，同样不会释放锁。
-    但是yield不能控制具体的交出CPU的时间，另外，yield方法只能让拥有相同优先级的线程有获取CPU执行时间的机会。
-```java
-public class YieldTest extends Thread {
-
-    public YieldTest(String name) {
-        super(name);
-    }
-
-    @Override
-    public void run() {
-        for (int i = 1; i <= 100; i++) {
-            System.out.println("" + this.getName() + "-----" + i);
-            if (i == 3 || i == 10 || i == 50 || i == 70 || i == 80 || i == 90) {
-                Thread.yield();
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        YieldTest yt1 = new YieldTest("张三");
-        YieldTest yt2 = new YieldTest("李四");
-        yt1.start();
-        yt2.start();
-    }
-}
-
-```
+### 主要方法
+* sleep()
+    * 静态方法 public static native void sleep(long millis) throws InterruptedException;
+    * 使当前所在线程进入阻塞，
+    * 让出 CPU，不释放对象锁，如果当前线程持有对某个对象的锁，即使调用sleep方法，其他线程也无法访问这个对象。
+    * 由于休眠时间结束后不一定会立即被 CPU 调度，因此线程休眠的时间可能大于传入参数
+    * 如果调用了sleep方法，必须捕获InterruptedException异常或者将该异常向上层抛出。如果被中断会抛出 InterruptedException
+    * 由于 sleep 是静态方法，它的作用时使当前所在线程阻塞。因此最好在线程内部直接调用 Thread.sleep()，如果在主线程调用某个线程的 sleep() 方法，其实阻塞的是主线程
+* yield()
+    * 这个方法没啥作用，一般不用
+    * public static native void yield() 是一个静态方法，不会释放锁，
+    * 暂停当前线程，让出 CPU 给优先级与当前线程相同，或者优先级比当前线程更高的就绪状态的线程。使正在运行中的线程重新变成就绪状态，并重新竞争 CPU 的调度权。它可能会获取到，也有可能被其他线程获取到
+    * 不会进入到阻塞状态，而是进入到就绪状态。
+    * 让当前线程暂停一下，重新进入就绪的线程池中。
+    * 不能控制具体的交出CPU的时间，只能让拥有相同优先级的线程有获取CPU执行时间的机会。
+* stop()
+    * 已废弃的方法，是一个不安全的方法，调用stop方法会直接终止run方法的调用
+    * 会抛出一个ThreadDeath错误，如果线程持有某个对象锁的话，会完全释放锁，导致对象状态不一致
+* join()
+    * 线程合并，调用线程会进入阻塞状态，需要等待被调用线程结束后才可以执行。
+    * “等待该线程终止”，该线程是指的主线程等待子线程的终止。在子线程调用了join()方法后面的代码，只有等到子线程结束了才能执行
+* suspend()
+    * 已废弃，容易造成死锁
     
-
-### stop()
-    stop方法已经是一个废弃的方法，它是一个不安全的方法。因为调用stop方法会直接终止run方法的调用，
-    并且会抛出一个ThreadDeath错误，如果线程持有某个对象锁的话，会完全释放锁，导致对象状态不一致。所以stop方法基本是不会被用到的。
-
-### join()
-    Thread.join() 表示线程合并，调用线程会进入阻塞状态，需要等待被调用线程结束后才可以执行。
-    作用是：“等待该线程终止”，这里需要理解的就是该线程是指的主线程等待子线程的终止。也就是 在子线程调用了join()方法后面的代码，
-    只有等到子线程结束了才能执行
-
-```java
-Thread thread = new Thread(new Runnable() {
-    @Override
-    public void run() {
-        System.out.println("thread is running!");
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-});
-thread.start();
-thread.join();
-System.out.println("main thread ");
-```
-
-###  启动线程的方法
-* 实现runnable（推荐，因为java单继承，实现接口可以同时实现一些其他功能，共享一些资源）
-* 实现callable （可以有返回值）
-* 继承thread类，并实现run方法
-
-
-## 线程取得控制权的方法
-    1.执行对象的某个同步实例方法。
-    2.执行对象对应类的同步静态方法。
-    3.执行对该对象加同步锁的同步块。
-`synchronized(this){ }` 等价于 `publicsynchronized void method(){}`
-     
-     同步分为类级别和对象级别，分别对应着类锁和对象锁。类锁是每个类只有一个，如果static的方法
-     被synchronized关键字修饰，则在这个方法被执行前必须获得类锁；对象锁类同。
-     wait(),notify(),notifyAll()不属于Thread类,而是属于Object基础类,也就是说每个对像都有wait(),notify(),notifyAll()的功能。
-     因为都个对像都有锁,锁是每个对像的基础,当然操作锁的方法也是最基础了。
-
-    守护线程和用户线程的区别在于：守护线程依赖于创建它的线程，而用户线程则不依赖。举个简单的例子：
-    如果在main线程中创建了一个守护线程，当main方法运行完毕之后，守护线程也会随着消亡。
-    而用户线程则不会，用户线程会一直运行直到其运行完毕。在JVM中，像垃圾收集器线程就是守护线程。
-### 被弃用的方法：
-    stop ： 不安全，容易破坏对象
-    suspend : 容易造成死锁
-
+### 线程取得控制权的方法
+* 执行对象的某个同步实例方法。
+* 执行对象对应类的同步静态方法。
+* 执行对该对象加同步锁的同步块。`synchronized(this){ }` 等价于 `public synchronized void method(){}`
+* 同步分为类级别和对象级别，分别对应着类锁和对象锁。类锁是每个类只有一个，如果static的方法被synchronized关键字修饰，则在这个方法被执行前必须获得类锁；对象锁类同。
+* wait(),notify(),notifyAll()不属于Thread类,而是属于Object基础类,也就是说每个对像都有wait(),notify(),notifyAll()的功能。
+* 守护线程和用户线程的区别在于：守护线程依赖于创建它的线程，而用户线程则不依赖。
+  举个简单的例子：如果在main线程中创建了一个守护线程，当main方法运行完毕之后，守护线程也会随着消亡。
+  而用户线程则不会，用户线程会一直运行直到其运行完毕。在JVM中，像垃圾收集器线程就是守护线程。
 * 抢占式调度，由CPU分配给线程时间片，操作系统根据线程的优先级选择下一个进行调度的线程不要将程序构建功能的正确性依赖于优先级
+
+### 线程优先级
+* 线程优先级
+    - 1~10 默认5，尽量优先，并不保证绝对优先，线程运行具有随机性
+    - 继承性： 线程A启动线程B，则A和B具有同样的优先级
+* 守护线程
+    - 一般用于执行后台任务
+    - JVM GC 线程
+    - 所有用户进程结束时，程序终止，同时会杀死所有的守护线程。
+    - setDaemon() 必须在线程运行之前设置 
+* 用户线程
+    - 执行用户级的任务
     
-## Object 相关方法
-### wait()
-    会让线程进入阻塞状态，并且会释放线程占有的锁，并交出CPU执行权限。
-    interrupt，顾名思义，即中断的意思。单独调用interrupt方法可以使得处于阻塞状态的线程抛出一个异常，
-    也就说，它可以用来中断一个正处于阻塞状态的线程；另外，通过interrupt方法和isInterrupted()方法来停止正在运行的线程。
-    但是如果配合isInterrupted()能够中断正在运行的线程，因为调用interrupt方法相当于将中断标志
-    位置为true，那么可以通过调用isInterrupted()判断中断标志是否被置位来中断线程的执行。
-    但是一般情况下不建议通过这种方式来中断线程，一般会在MyThread类中增加一个属性 isStop来标志
-    是否结束while循环，然后再在while循环中判断isStop的值。
-    等待对象的同步锁,需要获得该对象的同步锁才可以调用这个方法,否则编译可以通过，但运行时会收到一个异常：IllegalMonitorStateException。
-    调用任意对象的 wait() 方法导致该线程阻塞，该线程不可继续执行，并且该对象上的锁被释放。
-
-### notify()
-    唤醒在等待该对象同步锁的线程(只唤醒一个,如果有多个在等待),注意的是在调用此方法的时候，并不能确切的唤醒某一个等待状态的线程，
-    而是由JVM确定唤醒哪个线程，而且不是按优先级。调用任意对象的notify()方法则导致因调用该对象的 wait()方法而阻塞的线程中
-    随机选择的一个解除阻塞（但要等到获得锁后才真正可执行）。
-
-### notifyAll():
-    唤醒所有等待的线程,注意唤醒的是 notify之前 wait的线程,对于notify之后的wait线程是没有效果的。
-    调用obj的wait(), notify()方法前，必须获得obj锁，也就是必须写在synchronized(obj){...} 代码段内。
-
-
-
+## Object 方法
+* wait()
+    * 线程进入阻塞状态，释放线程占有的锁，并交出CPU执行权限。
+    * 接触堵塞的方法
+        * 其他线程调用该线程的interrupt()方法，使处于阻塞状态的线程抛出一个异常，中断一个正处于阻塞状态的线程；
+        * 其他线程调用 notify() notifyAll() 方法
+    * 通过interrupt方法和isInterrupted()方法来停止正在运行的线程。
+    * 如果配合isInterrupted()能够中断正在运行的线程，因为调用interrupt方法相当于将中断标志位置为true，那么可以通过调用isInterrupted()判断中断标志是否被置位来中断线程的执行。
+       但是一般情况下不建议通过这种方式来中断线程，一般会在MyThread类中增加一个属性 isStop来标志是否结束while循环，然后再在while循环中判断isStop的值。
+    * 等待对象的同步锁,需要获得该对象的同步锁才可以调用这个方法,否则编译可以通过，但运行时会收到一个异常：IllegalMonitorStateException。
+* notify()
+    * 唤醒在等待该对象同步锁的线程(只唤醒一个),注意并不能确切的唤醒某一个等待状态的线程，而是由JVM确定唤醒哪个线程，不是按优先级唤醒。
+    * 调用任意对象的notify()方法则导致因调用该对象的 wait()方法而阻塞的线程中随机选择的一个解除阻塞（但要等到获得锁后才真正可执行）。
+    * 只有获得锁之后，才能够调用notify()
+* notifyAll():
+    * 唤醒所有等待的线程,注意唤醒的是 notify之前 wait的线程,对于notify之后的wait线程是没有效果的。
+    * 调用obj的wait(), notify()方法前，必须获得obj锁，也就是必须写在synchronized(obj){...} 代码段内。
 * 挂起：一般是主动的，由系统或程序发出，甚至于辅存中去。（不释放CPU，可能释放内存，放在外存）
 * 阻塞：一般是被动的，在抢占资源中得不到资源，被动的挂起在内存，等待某种资源或信号量（即有了资源）将他唤醒。（释放CPU，不释放内存）
 
 
+## synchronized
+### synchronized特性
+* 1.原子性：确保线程互斥的访问同步代码;
+* 2.可见性：保证共享变量的修改能够及时可见。通过Java内存模型中的 “对一个变量unlock操作之前，必须要同步到主内存中；如果对一个变量进行lock操作，
+   会清空工作内存中此变量的值，需要重新从主内存中load操作；
+* 3.有序性：有效解决重排序问题。
+  即 “一个unlock操作先行发生(happen-before)于后面对同一个锁的lock操作”
+  从语法上讲，Synchronized可以把任何一个非null对象作为"锁"，
+  在HotSpot JVM实现中，锁有个专门的名字：对象监视器（Object Monitor）
+* synchronized 内置锁 是一种 对象锁（锁的是对象而非引用变量），作用粒度是对象 ，可以实现对临界资源的同步互斥访问 ，是可重入的。
+   可重入最大的作用是避免死锁，如：子类同步方法调用了父类同步方法，如没有可重入的特性，则会发生死锁。
+* 会引起上下问切换，带来线程调度开销
 
-## ThreadLocal
-    ThreadLocal用于保存某个线程共享变量：对于同一个static ThreadLocal，不同线程只能从中get，set，remove自己的变量，而不会影响其他线程的变量。
-    1、ThreadLocal.get: 获取ThreadLocal中当前线程共享变量的值。
-    2、ThreadLocal.set: 设置ThreadLocal中当前线程共享变量的值。
-    3、ThreadLocal.remove: 移除ThreadLocal中当前线程共享变量的值。
-    4、ThreadLocal.initialValue: ThreadLocal没有被当前线程赋值时或当前线程刚调用remove方法后调用get方法，返回此方法值。
+### synchronized原理
+* Synchronized的语义底层是通过一个monitor的对象来完成，
+* wait/notify等方法也依赖于monitor对象，这就是为什么只有在同步的块或者方法中才能调用wait/notify等方法，否则会抛出java.lang.IllegalMonitorStateException的异常
+* 同步代码块的实现： monitor enter  monitor exit
+* 同步方法： ACC_SYNCHRONIZED 标示符。JVM就是根据该标示符来实现方法的同步。方法的同步是一种隐式的方式来实现，无需通过字节码来完成
+* 锁住的是什么？随着锁级别的不同，对象头里会存储不同的内容。
+    - 偏向锁存储的是当前占用此对象的线程ID；
+    - 轻量级则存储指向线程栈中锁记录的指针。
+
+### synchronized实现
+* 监视器（Monitor）。任何一个对象都有一个Monitor与之关联，当且一个Monitor被持有后，它将处于锁定状态
+* Synchronized在JVM里的实现都是基于进入和退出Monitor对象来实现方法同步和代码块同步，虽然具体实现细节不一样，但是都可以通过成对的MonitorEnter和MonitorExit指令来实现。
+    * MonitorEnter指令：插入在同步代码块的开始位置，当代码执行到该指令时，将会尝试获取该对象Monitor的所有权，即尝试获得该对象的锁；
+    * MonitorExit指令：插入在方法结束处和异常处，JVM保证每个MonitorEnter必须有对应的MonitorExit；
+* 在Java虚拟机（HotSpot）中，Monitor是由ObjectMonitor实现的，（位于HotSpot虚拟机源码ObjectMonitor.hpp文件，C++实现的）：
+* ObjectMonitor中有两个队列，_WaitSet 和 _EntryList，用来保存ObjectWaiter对象列表（ 每个等待锁的线程都会被封装成ObjectWaiter对象 ），
+  _owner指向持有ObjectMonitor对象的线程，当多个线程同时访问一段同步代码时：首先会进入 _EntryList 集合，当线程获取到对象的monitor后，
+  进入_Owner区域并把monitor中的owner变量设置为当前线程，同时monitor中的计数器count加1；若线程调用 wait() 方法，将释放当前持有的monitor，
+  owner变量恢复为null，count自减1，同时该线程进入 WaitSet集合中等待被唤醒；若当前线程执行完毕，释放monitor（锁）并复位count的值，
+  以便其他线程进入获取monitor(锁)；
+* Monitor对象存在于每个Java对象的对象头Mark Word中（存储指针的指向），Synchronized锁便是通过这种方式获取锁的，这也是为什么Java中任意对象可以作为锁的原因，
+  同时notify/notifyAll/wait等方法会使用到Monitor锁对象，所以必须在同步代码块中使用
+
+### synchronized优化
+* 从JDK5引入了现代操作系统新增加的CAS原子操作（JDK5中并没有对synchronized关键字做优化，而是体现在J.U.C中，所以在该版本concurrent包有更好的性能 ），
+* 从JDK6开始，就对synchronized的实现机制进行了较大调整，包括使用JDK5引进的CAS自旋之外，还增加了：自适应的CAS自旋、锁消除、锁粗化、偏向锁、轻量级锁这些优化策略。
+   由于此关键字的优化使得性能极大提高，同时语义清晰、操作简单、无需手动关闭，所以推荐在允许的情况下尽量使用此关键字，同时在性能上此关键字还有优化的空间。
+
+
+### synchronized 四种状态 
+无锁状态 -> 偏向锁状态 -> 轻量级锁 -> 重量级锁 （只能升级，不能降级）
+* 偏向锁
+    - 偏向锁是在单线程执行代码块时使用的机制，如果在多线程并发的环境下（即线程A尚未执行完同步代码块，线程B发起了申请锁的申请），则一定会转化为轻量级锁或者重量级锁。
+    - 本质上偏向锁就是为了消除CAS，降低Cache一致性流量
+    - 当一个线程访问同步块并获取锁时，会在对象头和栈帧中的锁记录里存储锁偏向的线程ID，以后该线程进入和退出同步块时不需要花费CAS操作来争夺锁资源，
+      只需要检查是否为偏向锁、锁标识为以及ThreadID即可，
+* 轻量级锁
+    - 引入轻量级锁的主要目的是在没有多线程竞争的前提下，减少传统的重量级锁使用操作系统互斥量产生的性能消耗。当关闭偏向锁功能或者多个线程竞争偏向锁导致偏向锁升级为轻量级锁
+    - 轻量级锁适应的场景是线程交替执行同步块的情况，如果存在同一时间大量线程访问同一锁的情况，必然就会导致轻量级锁膨胀为重量级锁
+* 重量级锁
+    - Synchronized是通过对象内部的一个叫做 监视器锁（Monitor）来实现的。但是监视器锁本质又是依赖于底层的操作系统的Mutex Lock来实现的。
+      操作系统实现线程之间的切换这就需要从用户态转换到核心态，这个成本非常高，状态之间的转换需要相对比较长的时间，这就是为什么Synchronized效率低的原因。
+      因此，这种依赖于操作系统Mutex Lock所实现的锁我们称之为 “重量级锁
+* 其他
+    - 如果是单线程使用，那偏向锁毫无疑问代价最小，并且它就能解决问题，连CAS都不用做，仅仅在内存中比较下对象头就可以了；
+      如果出现了其他线程竞争，则偏向锁就会升级为轻量级锁；如果其他线程通过一定次数的CAS尝试没有成功，则进入重量级锁；
+      在第3种情况下进入同步代码块就要做偏向锁建立、偏向锁撤销、轻量级锁建立、升级到重量级锁，最终还是得靠重量级锁来解决问题，那这样的代价就比直接用重量级锁要大不少了。
+### synchronized 线程通信
+* 管道输入流  输出流
+* PipedWriter PipedReader
+
+### 使用示例
 
 ```java
-package Chapter8;
+public class ThreadSafeCount {
 
-/**
- * @program: multi-thread
- * @description:
- * @author: ZHQ
- * @create: 2019-02-12 21:11
- **/
-public class MyThreadLocal {
-    private static final ThreadLocal<Object> threadLocal = new ThreadLocal<Object>() {
-        /**
-         * ThreadLocal没有被当前线程赋值时或当前线程刚调用remove方法后调用get方法，返回此方法值
-         */
-        @Override
-        protected Object initialValue() {
-            System.out.println("调用get方法时，当前线程共享变量没有设置，调用initialValue获取默认值！");
-            return null;
-        }
-    };
+    private Long value;
 
-
-    public static void main(String[] args) {
-        new Thread(new MyIntegerTask("IntegerTask1")).start();
-        new Thread(new MyStringTask("StringTask1")).start();
-        new Thread(new MyIntegerTask("IntegerTask2")).start();
-        new Thread(new MyStringTask("StringTask2")).start();
+    // 虽然是读操作，此处的 synchronized 不能去掉，因为需要 synchronized 保证内存的可见性
+    public synchronized Long getCount() {
+        return value;
     }
 
-
-    public static class MyIntegerTask implements Runnable {
-        private String name;
-
-        MyIntegerTask(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public void run() {
-            for (int i = 0; i < 5; i++) {
-                // ThreadLocal.get方法获取线程变量
-                if (null == MyThreadLocal.threadLocal.get()) {
-                    // ThreadLocal.et方法设置线程变量
-                    MyThreadLocal.threadLocal.set(0);
-                    System.out.println("线程" + name + ": 0");
-                } else {
-                    int num = (Integer) MyThreadLocal.threadLocal.get();
-                    MyThreadLocal.threadLocal.set(num + 1);
-                    System.out.println("线程" + name + ": " + MyThreadLocal.threadLocal.get());
-                    if (i == 3) {
-                        MyThreadLocal.threadLocal.remove();
-                    }
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-    }
-
-    public static class MyStringTask implements Runnable {
-        private String name;
-
-        MyStringTask(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public void run() {
-            for (int i = 0; i < 5; i++) {
-                if (null == MyThreadLocal.threadLocal.get()) {
-                    MyThreadLocal.threadLocal.set("a");
-                    System.out.println("线程" + name + ": a");
-                } else {
-                    String str = (String) MyThreadLocal.threadLocal.get();
-                    MyThreadLocal.threadLocal.set(str + "a");
-                    System.out.println("线程" + name + ": " + MyThreadLocal.threadLocal.get());
-                }
-                try {
-                    Thread.sleep(800);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
+    public synchronized void inc() {
+        value++;
     }
 }
 ```
 
 
+## volatile
+* volatile 是一种轻量级的同步机制。
+* 硬件系统架构演进，CPU高速缓存诞生，该缓存为某个CPU独有，只与在CPU运行的线程有关
+    - CPU三级缓存架构
+        - L1 cache ： 
+        - L2 cache ： 
+        - L3 cache ： 与主内存打交道
+    - CPU缓存机制的条件下，如何保证各个CPU之间的缓存数据一致性？
+        - 直写 (write-through)
+        - 回写 (write-back)
+    - 解决缓存一致性的方案
+        - 通过在总线加lock
+        - 缓存一致性协议 ： 窥探技术  MESI协议（缓存行四种状态的首字母缩写）
+    
+* 保证共享变量的可见性，不能保证原子性，也不能保证线程安全，可以避免重排序和内存可见性问题
+    * 写 volatile 变量时，可以确保 volatile 之前的变量不会被编译器重排序到 volatile 之后
+    * 读 volatile 变量时，可以确保 volatile 读之后的操作不会被编译器重排序到 volatile 读之前
+* 作用是确保所有线程在同一时刻读取到的共享变量的值是一致的
+* 如果某个线程对 volatile 修饰的共享变量进行更新，那么其他线程可以立即看到这个更新
+
+* as if serial
+    - 编译器和处理器不会改变存在数据依赖关系的两个操作的执行顺序。如果没有数据依赖关系，则可能被重排序
+    - 编译器和处理器不管怎样重排序，单线程程序的执行结果不能被改变。
+* 指令重排序
+    - 编译器优化重排序
+    - 指令级并行重排序，将多条指令折叠执行
+    - 内存系统重排序，使用缓存 读/写缓冲区
+
+* volatile内存语义
+    - 1 保证数据可见性，不保证原子性
+        - 实现方式：通过内存屏障来实现
+            - LoadLoad
+            - LoadStore
+            - StoreLoad
+            - StoreStore
+        - 如何保证原子性
+            - 加锁：使用 synchronized 加锁
+            - 使用 AtomicInteger
+        - happen-before
+            - 顺序规则
+            - 监视器锁规则
+            - volatile 变量规则 
+    - 2 禁止指令重排序
+        - 实现方式：通过内存屏障来实现
+
+### 使用volatile的场景
+* 写入的变量值不依赖变量的当前值的时候，如果是 获取-计算-写入的三步操作，则volatile不能够保证原子性
+
+
+### 伪共享
+多线程条件下访问同一个缓存行中的多个变量
+
+
+
+
+
+## 锁
+* 乐观锁和悲观锁（从数据库中引入的概念）
+    * 悲观锁：假定数据每次都会被修改， select ... for update 对数据库的行进行加锁，保证每次只有一个线程对数据进行修改
+    * 悲观锁：假定数据不会被修改，通过data 的版本号来实现校验。 version + 1, 如果不能成功，则根据业务逻辑决定一直重试还是重试有限的次数。
+      类似于CAS的自旋操作，不会产生任何的死锁
+* 公平锁和非公平锁
+    * 公平锁：先到先得
+    * 非公平锁：直接抢占，未必先到先得  ReentrantLock 可以指定公平还是非公平，默认非公平
+* 独占锁和共享锁
+    * 根据锁只能被单个线程持有还是能够对多个线程持有进行划分
+    * 独占锁  ReentrantLock 是一种悲观锁
+    * 共享锁  ReadWriteLock 是一种乐观锁
+* 可重入锁
+    * synchronized 锁的内部标识锁被哪个线程占用，通过维护一个计数器count记录加锁的次数
+* 自旋锁
+    * 因为一个线程由用户态切换为核心态的开销比较大，因此通过不放弃CPU使用权的情况下多次尝试获取锁，使用CPU的时间获取线程堵塞与调度的开销
+      但是很可能CPU时间白白浪费没有成果
+
+
+
+
+
+
+
+
+## CAS(compare and swap)
+* 非堵塞的原子性操作，通过硬件保证操作的原子性 Unsafe 类
+* 存在一个经典的ABA问题，AtomicStampedReference 通过时间戳可以避免ABA问题的发生
+- 取值，询问，修改
+- CAS在底层的硬件级别给你保证一定是原子的，同一时间只有一个线程可以执行CAS，先比较再设置，其他的线程的CAS同时间
+  去执行此时会失败
+
+
+
+
+
 ## Semaphore信号量
-    Semaphore类是一个计数信号量，必须由获取它的线程释放，通常用于限制可以访问某些资源（物理或逻辑的）线程数目。
-    一个信号量有且仅有3种操作，且它们全部是原子的：初始化、增加和减少
-    增加可以为一个进程解除阻塞；
-    减少可以让一个进程进入阻塞。
+Semaphore类是一个计数信号量，必须由获取它的线程释放，通常用于限制可以访问某些资源（物理或逻辑的）线程数目。
+一个信号量有且仅有3种操作，且它们全部是原子的：初始化、增加和减少
+增加可以为一个进程解除阻塞；
+减少可以让一个进程进入阻塞。
 
 ```java
 public class SemaphoreDemo {
@@ -308,18 +326,6 @@ public class SemaphoreDemo {
 * submit 和 execute 分别有什么区别呢？
     - execute 没有返回值，如果不需要知道线程的结果就使用 execute 方法，性能会好很多。
     - submit 返回一个 Future 对象，如果想知道线程结果就使用 submit 提交，而且它能在主线程中通过 Future 的 get 方法捕获线程中的异常。
- 
- 
- 
- 
- 
- 
- 
- 
- 
-# Java并发编程笔记
-## 线程池
-
 
 ### 线程
 
