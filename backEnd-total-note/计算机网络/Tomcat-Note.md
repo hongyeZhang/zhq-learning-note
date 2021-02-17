@@ -9,19 +9,13 @@ sh startup.sh
 netstat -tunlp | grep 8080
 sh shutdown.sh 
 
-
-
-
 ```
-
-
-
 
 ### Tomcat基础
 软件架构：B/S  C/S
-资源：
-* 静态资源：所有用户访问的资源都相同。html js css jpg， 可以直接被浏览器解析
-* 动态资源：servlet/jsp, php, asp
+* 资源类型：
+    * 静态资源：所有用户访问的资源都相同。html js css jpg， 可以直接被浏览器解析
+    * 动态资源：servlet/jsp, php, asp
 
 网络通信三要素：传输协议、主机、端口号
 基础协议：
@@ -29,7 +23,10 @@ sh shutdown.sh
 * udp:不安全协议。速度快
 
 常见的web服务器软件
-webLogic（收费，大型） webSphere（收费，大型） JBOSS（收费，大型） Tomcat(免费的，中小型)
+webLogic（收费，大型） 
+webSphere（收费，大型） 
+JBOSS（收费，大型） 
+Tomcat(免费的，中小型)
 
 8.5版本
 目录结构:
@@ -43,16 +40,14 @@ webapps: tomcat默认的部署目录
 下载源码，将conf和webapp 移动到home目录下
 
 ### tomcat架构
-HTTP 工作原理
-应用层协议，传输层采用TCP协议
-![avatar](/picture/tomcat/Http请求原理.png)
+HTTP工作原理  应用层协议，传输层采用TCP协议
+![avatar](../picture/tomcat/Http请求原理.png)
 
-HTTP工作流程
-HTTP服务器接受请求，将请求转发给servlet 容器，由容器决定调用哪个业务类，所有的业务类都需要实现servelet接口。
-HTTP服务器与业务类实现解耦。
+* HTTP工作流程
+    * HTTP服务器接受请求，将请求转发给servlet 容器，由容器决定调用哪个业务类，所有的业务类都需要实现servelet接口。HTTP服务器与业务类实现解耦。
 
 Servelet容器工作流程
-![servelet1.png](/picture/tomcat/servlet1.png)
+![servelet1.png](../picture/tomcat/servlet1.png)
 定位servlet, 加载servlet，响应servlet
 
 连接器 -> 容器
@@ -62,7 +57,7 @@ HTTP1.1  HTTP2.0
 
 ### 连接器组件
 ProtcocalHandler,
-EndPoint  Porcessor  Aaapter
+EndPoint  Porcessor  Adapter
 
 ### 容器 catalina
 是servletring器的实现
@@ -90,17 +85,11 @@ JspServlet 处理 index.jsp 请求找到index.jsp， 并生成一个servlet.java
 （2）
 
 ### tomcat 服务器配置
-/conf
-
-
-server.xml
+#### /conf/server.xml
 8005 监听shutdown，五个监听器
+executor 配置共享线程池，每个连接器使用自己的线程池
 
-executor 配置共享线程池，
-每个连接器使用自己的线程池
-
-
-<connector>
+#### <connector>
 一个service下面可以有多个connector ，如果HTTP1.1  则选择一个JAVA NIO 的连接器
 redirect HTTP 8443  针对 https 协议进行访问的资源，自动重定向
 connector可以指定每个executor使用的共享线程池
@@ -109,13 +98,8 @@ EngineHost
 localhost  webapps  当前主机下部署应用的位置  autoDeploy 是否自动部署
 unpackWars 自动解压war包，不自动解压，里面的内容也是可以访问的。不影响功能。
 一个引擎下面可以有多个主机，多个主机下面可以有多个应用
-
 Context：用于配置一个web应用  配置在一个任意的目录下
-
-
 tomcat-user.xml
-
-
 
 ### web配置
 web.xml
@@ -123,8 +107,7 @@ tomcat 文件中配置了相关的servlet，默认的和jsp 的servlet
 配置欢迎页面（默认配置）
 
 在工程目录下，同样可以配置web.xml，针对于当前web的配置
-（1）context-param
-配置初始化参数，可以在servlet中拿到，如何配置+怎样获取
+（1）context-param 配置初始化参数，可以在servlet中拿到，如何配置+怎样获取
 （2）会话配置
 HTTP无状态的，session（服务端） cookie（客户端） 来解决问题
 服务器产生JSESSIONID 给客户端，作为客户端的cookie
@@ -177,7 +160,7 @@ JAVA_OPTS="-server -Xms2014m -Xmx2048m -XX:MetaspaceSize=256"
 
 ### tomcat集群搭建
 单台服务器的承载能力有限，
-布置多台tomcat   需要修改端口号，修改3个端口号
+布置多台tomcat 需要修改端口号，修改3个端口号
 暂且不操作，就是nginx + 布置多台tomcat
 
 ### session 共享
@@ -248,7 +231,6 @@ eden区与survivor区的大小比值，默认为8，不建议修改
 配置在 catalina.sh
 
 压力测试多次，取平均值
-
 jmap -heap PID  查看堆内存的使用情况（配置+使用 情况）
 
 #### JVM垃圾回收策略调优
@@ -304,14 +286,7 @@ onError（出现错误时）
 messageHandler 消息处理器接受消息
 onMessage
 RemoteEndpoint
-
-通过websocket 实现简易的聊天室功能。系统广播：向所有用户发送消息
-
-
-
-
-
-
+通过 websocket 实现简易的聊天室功能。系统广播：向所有用户发送消息
 
 get post  put delete option
 请求头：
@@ -323,17 +298,11 @@ response 返回的状态码
 报错说明请求没有进入到后台服务；
 原因：1）前端提交数据的字段名称或者是字段类型和后台的实体类不一致，导致无法封装；
        2）前端提交的到后台的数据应该是json字符串类型，而前端没有将对象转化为字符串类型；
-
-查状态码
-500
-502
-503
-
+查状态码 500 502 503
 套接字  socket  封装底层的TCP UDP
 套接字通信：
 serverSocket 服务器套接字
 客户端套接字：
-
 CRLF是Carriage-Return Line-Feed的缩写，意思是回车换行，就是回车(CR, ASCII 13, \r) 换行(LF, ASCII 10, \n)
 
 TCP
@@ -349,166 +318,38 @@ TCP
 dataGramSocket
 
 WEB应用通信机制
-
-
 Tomcat整体架构
 
-首先是server容器，
-最外层：listener
+首先是server容器，最外层：listener
 
-server.xml
-包括很多listenr
+server.xml 包括很多listenr
 JNI  jana native interface
 jasperListener
-
 8005 监听tomcat关闭的请求
-
 Dos攻击
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### tomcat处理一次HTTP请求的过程
-
 1、用户点击网页内容，请求被发送到本机端口8080，被在那里监听的Coyote HTTP/1.1 Connector获得。 2、Connector把该请求交给它所在的Service的Engine来处理，并等待Engine的回应。 3、Engine获得请求localhost/test/index.jsp，匹配所有的虚拟主机Host。 4、Engine匹配到名为localhost的Host（即使匹配不到也把请求交给该Host处理，因为该Host被定义为该Engine的默认主机），名为localhost的Host获得请求/test/index.jsp，匹配它所拥有的所有的Context。Host匹配到路径为/test的Context（如果匹配不到就把该请求交给路径名为“ ”的Context去处理）。 5、path=“/test”的Context获得请求/index.jsp，在它的mapping table中寻找出对应的Servlet。Context匹配到URL PATTERN为*.jsp的Servlet,对应于JspServlet类。 6、构造HttpServletRequest对象和HttpServletResponse对象，作为参数调用JspServlet的doGet（）或doPost（）.执行业务逻辑、数据存储等程序。 7、Context把执行完之后的HttpServletResponse对象返回给Host。 8、Host把HttpServletResponse对象返回给Engine。 9、Engine把HttpServletResponse对象返回Connector。 10、Connector把HttpServletResponse对象返回给客户Browser。
-
-
 1、什么是JSP?
     JSP(Java Server Pages)是Sun 公司指定的一种服务器端动态页面技术的组件规范，Jsp是以“.jsp”为后缀的文件，在该文件中主要是html 和少量的java 代码。jsp 文件在容器中会转换成Servlet中执行。
-
 2、什么是Servlet？
     Servlet (Server Applet)是Sun公司指定的一种用来扩展Web服务器功能的组件规范，属于服务器端程序，主要功能在于交互式地浏览和修改数据，生成动态Web内容。
-
 借用知乎上java老师的一句话：jsp就是在html里面写java代码，servlet就是在java里面写html代码。
 ————————————————
-版权声明：本文为CSDN博主「大白快跑8」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
 原文链接：https://blog.csdn.net/zt15732625878/article/details/79951933
+
+
+
+
+
+# 《tomcat架构解析》
+## I/O
+* BIO Blocking IO
+    * 
+* NIO
+* NIO2
+* APR
+
+
+
+
