@@ -1,0 +1,510 @@
+[
+  {
+    "moduleId": 4055,
+    "type": "slotMachineBlackFive",
+    "configList": [
+      {
+        "missionId": 15103,
+        "weight": 5,
+        "groupId": 2
+      },
+      {
+        "missionId": 15104,
+        "weight": 4,
+        "groupId": 2
+      },
+      {
+        "missionId": 15105,
+        "weight": 3,
+        "groupId": 2
+      },
+      {
+        "missionId": 15106,
+        "weight": 2,
+        "groupId": 2
+      },
+      {
+        "missionId": 15107,
+        "weight": 1,
+        "groupId": 2
+      },
+      {
+        "missionId": 15108,
+        "weight": 4,
+        "groupId": 4
+      },
+      {
+        "missionId": 15109,
+        "weight": 3,
+        "groupId": 4
+      },
+      {
+        "missionId": 15111,
+        "weight": 2,
+        "groupId": 4
+      },
+      {
+        "missionId": 15110,
+        "weight": 1,
+        "groupId": 4
+      },
+      {
+        "missionId": 15112,
+        "weight": 1,
+        "groupId": 5
+      },
+      {
+        "missionId": 15113,
+        "weight": 2,
+        "groupId": 6
+      },
+      {
+        "missionId": 15114,
+        "weight": 1,
+        "groupId": 6
+      }
+    ]
+  },
+  {
+    "moduleId": 653,
+    "type": "moneyIsland",
+    "configList": [
+      {
+        "missionId": 11097,
+        "weight": 4,
+        "groupId": 1,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 11098,
+        "weight": 3,
+        "groupId": 1,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 11121,
+        "weight": 2,
+        "groupId": 1,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 11099,
+        "weight": 1,
+        "groupId": 1,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 11277,
+        "weight": 0,
+        "groupId": 2,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 11108,
+        "weight": 5,
+        "groupId": 3,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 11112,
+        "weight": 4,
+        "groupId": 3,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.80.0",
+          "IOS": "4.80.0",
+          "H5_IOS_BRIDGE": "4.80.0",
+          "ANDROID": "4.80.0"
+        }
+      },
+      {
+        "missionId": 11109,
+        "weight": 3,
+        "groupId": 3,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 11110,
+        "weight": 2,
+        "groupId": 3,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 11111,
+        "weight": 1,
+        "groupId": 3,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 11113,
+        "weight": 1,
+        "groupId": 4,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.90.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 11114,
+        "weight": 3,
+        "groupId": 5,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.90.0",
+          "IOS": "4.90.0",
+          "H5_IOS_BRIDGE": "4.90.0",
+          "ANDROID": "4.90.0"
+        }
+      },
+      {
+        "missionId": 11115,
+        "weight": 2,
+        "groupId": 5,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.90.0",
+          "IOS": "4.90.0",
+          "H5_IOS_BRIDGE": "4.90.0",
+          "ANDROID": "4.90.0"
+        }
+      },
+      {
+        "missionId": 11116,
+        "weight": 1,
+        "groupId": 5,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.90.0",
+          "IOS": "4.90.0",
+          "H5_IOS_BRIDGE": "4.90.0",
+          "ANDROID": "4.90.0"
+        }
+      },
+      {
+        "missionId": 11117,
+        "weight": 1,
+        "groupId": 6
+      }
+    ]
+  },
+  {
+    "moduleId": 3756,
+    "type": "collectCard",
+    "configList": [
+      {
+        "missionId": 14397,
+        "weight": 2,
+        "groupId": 1,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 14400,
+        "weight": 1,
+        "groupId": 1,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 14398,
+        "weight": 2,
+        "groupId": 2,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 14401,
+        "weight": 1,
+        "groupId": 2,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.80.0",
+          "IOS": "4.80.0",
+          "H5_IOS_BRIDGE": "4.80.0",
+          "ANDROID": "4.80.0"
+        }
+      },
+      {
+        "missionId": 14399,
+        "weight": 2,
+        "groupId": 3,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 14402,
+        "weight": 1,
+        "groupId": 3,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 14403,
+        "weight": 2,
+        "groupId": 4,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 14404,
+        "weight": 1,
+        "groupId": 4,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.90.0",
+          "IOS": "4.90.0",
+          "H5_IOS_BRIDGE": "4.90.0",
+          "ANDROID": "4.90.0"
+        }
+      },
+      {
+        "missionId": 14405,
+        "weight": 1,
+        "groupId": 5
+      }
+    ]
+  },
+  {
+    "moduleId": 3347,
+    "type": "slotMachine",
+    "configList": [
+      {
+        "missionId": 13922,
+        "weight": 1,
+        "groupId": 5
+      },
+      {
+        "missionId": 13935,
+        "weight": 1,
+        "groupId": 3,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "5.0.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "5.0.0"
+        }
+      },
+      {
+        "missionId": 13936,
+        "weight": 1,
+        "groupId": 2,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      },
+      {
+        "missionId": 13937,
+        "weight": 1,
+        "groupId": 1
+      },
+      {
+        "missionId": 13938,
+        "weight": 2,
+        "groupId": 6
+      },
+      {
+        "missionId": 14131,
+        "weight": 1,
+        "groupId": 6,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "4.75.0",
+          "IOS": "4.75.0",
+          "H5_IOS_BRIDGE": "4.75.0",
+          "ANDROID": "4.75.0"
+        }
+      }
+    ]
+  },
+  {
+    "moduleId": 3739,
+    "type": "duoDuoFairy",
+    "configList": [
+      {
+        "missionId": 14362,
+        "weight": 3,
+        "groupId": 1
+      },
+      {
+        "missionId": 14586,
+        "weight": 2,
+        "groupId": 1
+      },
+      {
+        "missionId": 14587,
+        "weight": 1,
+        "groupId": 1
+      },
+      {
+        "missionId": 14363,
+        "weight": 1,
+        "groupId": 5
+      },
+      {
+        "missionId": 14364,
+        "weight": 4,
+        "groupId": 3
+      },
+      {
+        "missionId": 14667,
+        "weight": 3,
+        "groupId": 3
+      },
+      {
+        "missionId": 14668,
+        "weight": 2,
+        "groupId": 3
+      },
+      {
+        "missionId": 14669,
+        "weight": 1,
+        "groupId": 3
+      },
+      {
+        "missionId": 14365,
+        "weight": 1,
+        "groupId": 2
+      },
+      {
+        "missionId": 14670,
+        "weight": 4,
+        "groupId": 6,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "5.29.0",
+          "IOS": "5.29.0",
+          "H5_IOS_BRIDGE": "5.29.0",
+          "ANDROID": "5.29.0"
+        }
+      },
+      {
+        "missionId": 14671,
+        "weight": 3,
+        "groupId": 6,
+        "versionMap": {
+          "H5_ANDROID_BRIDGE": "5.29.0",
+          "IOS": "5.29.0",
+          "H5_IOS_BRIDGE": "5.29.0",
+          "ANDROID": "5.29.0"
+        }
+      },
+      {
+        "missionId": 14672,
+        "weight": 2,
+        "groupId": 6
+      },
+      {
+        "missionId": 14673,
+        "weight": 1,
+        "groupId": 6
+      },
+      {
+        "missionId": 14366,
+        "weight": 1,
+        "groupId": 4
+      },
+      {
+        "missionId": 14795,
+        "weight": 1,
+        "groupId": 7
+      },
+      {
+        "missionId": 14794,
+        "weight": 2,
+        "groupId": 7
+      },
+      {
+        "missionId": 14817,
+        "weight": 2,
+        "groupId": 8
+      },
+      {
+        "missionId": 14818,
+        "weight": 1,
+        "groupId": 8
+      }
+    ]
+  },
+  {
+    "moduleId": 3967,
+    "type": "carPk",
+    "configList": [
+      {
+        "missionId": 14692,
+        "weight": 1,
+        "groupId": 8
+      },
+      {
+        "missionId": 14687,
+        "weight": 1,
+        "groupId": 9
+      }
+    ]
+  }
+]

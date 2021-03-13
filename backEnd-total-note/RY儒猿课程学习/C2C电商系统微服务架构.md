@@ -11,6 +11,26 @@
 
 
 
+## chapter11 ZooKeeper、Eureka、Consul、Nacos 的选型对比
+* zookeeper 基础知识以及基本结构原理
+    * leader + follower 的角色配置
+    * 服务注册：写入数据
+    * ZAB协议
+    * 典型的 CP ， partition(分区容错性) C(consistency 一致性) 尽可能保证读取到的数据是一致的，一旦leader崩溃，短时间内不可用，然后选主，进行数据同步
+
+* eureka AP模型，保证可用性，数据一致性不是很高
+* consul 基于raft算法的CP模型
+* nacos 基于raft算法的CP模型  （未来的选择）  功能最为完善
+
+## nacos注册中心架构原理
+* 
+
+
+
+
+
+
+
 
 
 
