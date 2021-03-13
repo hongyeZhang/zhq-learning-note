@@ -27,8 +27,10 @@ hs_err_pid*
 *.html
 *.xhtml
 
-*.png
+
 *.jpg
 /tmp
 tmp.json
 .idea
+*.xml
+*.iml

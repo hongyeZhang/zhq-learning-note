@@ -4,7 +4,12 @@
 
 ## 学习进度记录
 ### 1【死磕 Spring】—— IoC 之深入理解 Spring IoC
-* ClassPathXmlApplicationContext 类体系的继承结构，基本上包含了 IoC 体系中大部分的核心类和接口。
+* ClassPathXmlApplicationContext 类体系的继承结构，基本上包含了 IoC 体系中大部分的核心类和接口。类图如下：
+![ClassPathXmlApplicationContext](../picture/spring/ClassPathXmlApplicationContext.png)
+
+
+
+
 * Resource 体系
 * ResourceLoader 体系
 * BeanFactory 体系
