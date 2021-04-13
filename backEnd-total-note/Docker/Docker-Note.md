@@ -165,6 +165,8 @@ docker exec -it containerID ls -l /tmp  执行容器的一个命令
 
 docker exec -it 351b7c0a9c3e /bin/bash
 
+docker exec -it 351b7c0a9c3e /bin/bash
+
 
 从容器内拷贝文件到主机内：
 docker cp containerID:容器内的目的路径  本机的路径

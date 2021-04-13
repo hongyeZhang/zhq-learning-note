@@ -127,7 +127,53 @@ ConfigurableEnvironment	设置激活的 profile 和默认的 profile 的功能�
 
 
 
-## chapter6 
+## chapter11 bean的生命周期
+Spring Bean的生命周期只有四个阶段：
+1. 实例化（Instantiation）：调用构造函数
+2. 属性赋值（Populate）：设置依赖注入
+3. 初始化（Initialization）：调用init方法
+4. 销毁（Destruction）：调用destory方法
+
+
+![SpringBean生命周期](../picture/spring/SpringBean生命周期.png)
+
+
+
+生命周期也可以理解为四个等级。每个等级中都用有相应的接口，实现其中某个接口或者将实现类注入到Spring容器，容器就会在相应的时机调用其方法。
+1. 工厂级处理器接口
+2. 容器级生命周期接口
+3. Bean级生命周期接口
+4. Bean本身方法
+
+
+Spring中Bean初始化/销毁的三种方法
+1. 通过实现 InitializingBean/DisposableBean 接口来定制初始化之后/销毁之前的操作方法；
+2. 在<bean> 元素上添加 init-method/destroy-method来指定初始化之后 /销毁之前调用的操作方法；
+3. 在方法上加上@PostConstruct 或@PreDestroy注解来指定该方法是在初始化之后还是销毁之前调用。
+
+Spring Bean 详细的生命周期：
+1. Spring对Bean进行实例化，调用Bean的构造参数
+2. 设置对象属性，调用Bean的set方法，将属性注入到bean的属性中
+3. 检查Bean是否实现BeanNameAware、BeanFactoryAware、ApplicationContextAware接口，如果实现了这几个接口Spring会分别调用其中实现的方法。
+4. 如果Bean是否实现BeanPostProcessor接口，Spring会在初始化方法的前后分别调用postProcessBeforeInitialization和postProcessAfterInitialization方法
+5. 如果Bean是否实现InitalizingBean接口，将调用afterPropertiesSet()方法
+6. 如果Bean声明初始化方法，也会被调用
+7. 使用Bean。Bean将会一直保留在应用的上下文中，直到该应用上下文被销毁。
+8. 检查Bean是否实现DisposableBean接口，Spring会调用它们的destory方法
+9. 如果Bean声明销毁方法，该方法也会被调用
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

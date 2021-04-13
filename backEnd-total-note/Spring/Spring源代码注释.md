@@ -136,7 +136,7 @@ public class AbstractApplicationContext {
 ```
 
 
-## 2 obtainFreshBeanFactory()
+## 2 ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 ```java
 public class AbstractRefreshableApplicationContext {
@@ -172,5 +172,7 @@ public class AbstractRefreshableApplicationContext {
 ```
 
 
+
+## 
 
 
