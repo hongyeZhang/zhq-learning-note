@@ -1,5 +1,10 @@
 # spring源码解析笔记
 
+
+## 主要思想
+* Spring IOC 将XML解析为 BeanDefinition
+
+
 ## chapter1 基本介绍与源码搭建
 * gradle 
 * spring-framework 4.3
@@ -138,12 +143,25 @@ Spring Bean的生命周期只有四个阶段：
 ![SpringBean生命周期](../picture/spring/SpringBean生命周期.png)
 
 
+![SpringBean实例化](../picture/spring/SpringBean实例化.png)
 
 生命周期也可以理解为四个等级。每个等级中都用有相应的接口，实现其中某个接口或者将实现类注入到Spring容器，容器就会在相应的时机调用其方法。
 1. 工厂级处理器接口
 2. 容器级生命周期接口
 3. Bean级生命周期接口
 4. Bean本身方法
+
+BeanFactoryPostProcessor	工厂后处理器接口	容器创建完毕，装配Bean源后立即调用
+InstantiationAwareBeanPostProcessor	容器后处理器接口	分别在调用构造之前，注入属性之前，实例化完成时调用
+BeanPostProcessor	容器后处理器接口	分别在Bean的初始化方法调用前后执行
+BeanNameAware	Bean级后置处理器接口	注入属性后调用
+BeanFactoryAware	Bean级后置处理器接口	注入属性后调用
+InitializingBean	Bean级后置处理器接口	在类本身的初始化方法之前调用其方法（本身也是初始化方法）
+DisposableBean	Bean级后置处理器接口	在类本身的销毁方法执行之前调用其方法（本身也是销毁方法）
+init方法	Bean本身方法	在注入属性之后调用初始化方法
+destroy方法	Bean本身方法	在关闭容器的时候进行销毁
+
+
 
 
 Spring中Bean初始化/销毁的三种方法
@@ -161,6 +179,149 @@ Spring Bean 详细的生命周期：
 7. 使用Bean。Bean将会一直保留在应用的上下文中，直到该应用上下文被销毁。
 8. 检查Bean是否实现DisposableBean接口，Spring会调用它们的destory方法
 9. 如果Bean声明销毁方法，该方法也会被调用
+
+
+bean的获取流程
+
+![Bean的获取](../picture/spring/Bean的获取.png)
+
+
+![Bean的创建](../picture/spring/Bean的创建.png)
+
+
+
+
+
+
+
+
+## chaprer19 Spring注解上下文和注释
+Spring3.0之后，提供了使用AnnotationConfigApplicationContext来实现基于Java配置类加载Spring应用上下文的功能。这种方式可以避免使用application.xml进行配置，相比XML配置这种方式也更加便捷。
+这种ApplicationContext实现不仅能够接受@Configuration类作为输入，而且还可以接受@Component注解类和带有JSR-330元数据注解的类。
+
+
+### AnnotationBeanDefinition
+该接口继承自BeanDefinition接口
+```java
+public interface AnnotatedBeanDefinition extends BeanDefinition {
+
+	// 获取注解元数据
+	AnnotationMetadata getMetadata();
+
+	// 获取此Bean定义的工厂方法的元数据
+    // 如果在配置类中使用了@Bean注解，被@Bean标记的方法就会被解析为FactoryMethodMetadata
+	MethodMetadata getFactoryMethodMetadata();
+}
+
+```
+
+
+1. AnnotatedGenericBeanDefinition
+```java
+public static void main(String[] args) {
+    AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+    ctx.register(JavaConfig.class);
+}
+```
+如上代码块中JavaConfig，和使用@Import注解导入的类，都会被解析为这种类型。
+2. ScannedGenericBeanDefinition
+通过注解扫描类，如@Service @Compnent等配置的方式，都会被解析为ScannedGenericBeanDefinition。
+3. ConfigurationClassBeanDefinition
+通过使用@Bean注解配置的方式，都会被解析为ConfigurationClassBeanDefinition。
+
+
+
+```java
+public class AnnotationConfigApplicationContext {
+
+    // 注册带注解的Bean（编程方式注册，仅适用于显式注册的类）
+    private final AnnotatedBeanDefinitionReader reader;
+    
+    // 扫描方式注册带注解的Bean（Bean定义扫描器，检测指定路径中的Bean候选者）
+    private final ClassPathBeanDefinitionScanner scanner;
+    
+    // AnnotationConfigApplicationContext默认构造函数
+    public AnnotationConfigApplicationContext() {
+        this.reader = new AnnotatedBeanDefinitionReader(this);
+        this.scanner = new ClassPathBeanDefinitionScanner(this);
+    }
+    
+    // 使用BeanFactory创建一个新的AnnotationConfigApplicationContext
+    public AnnotationConfigApplicationContext(DefaultListableBeanFactory beanFactory) {
+        super(beanFactory);
+        this.reader = new AnnotatedBeanDefinitionReader(this);
+        this.scanner = new ClassPathBeanDefinitionScanner(this);
+    }
+    
+    // 使用给定的带注解的类创建AnnotationConfigApplicationContext，并刷新上下文
+    public AnnotationConfigApplicationContext(Class<?>... annotatedClasses) {
+        this();
+        register(annotatedClasses);
+        // 刷新上下文
+        refresh();
+    }
+    
+    // 创建AnnotationConfigApplicationContext，扫描指定包路径中的Bean定义
+    public AnnotationConfigApplicationContext(String... basePackages) {
+        this();
+        scan(basePackages);
+        // 刷新上下文
+        refresh();
+    }
+}
+```
+
+
+```java
+public class AnnotatedBeanDefinitionReader {
+    public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
+        // BeanDefinition定义，增加了注解元数据的支持
+        AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
+        // 检测是否需要跳过@Conditional注解
+        if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
+            return;
+        }
+    
+        // 解析对应的Scope
+        ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
+        // 设置abd的Scope
+        abd.setScope(scopeMetadata.getScopeName());
+        // 使用BeanNameGenerator生成对应的beanName
+        String beanName = (name != null ? name : this.beanNameGenerator.generateBeanName(abd, this.registry));
+        // 对常用注解进行处理
+        AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
+        // 除了Bean类级别的限定符外，还需要处理特定限定符注解
+        if (qualifiers != null) {
+            for (Class<? extends Annotation> qualifier : qualifiers) {
+                if (Primary.class == qualifier) {
+                    abd.setPrimary(true);
+                }
+                else if (Lazy.class == qualifier) {
+                    abd.setLazyInit(true);
+                }
+                else {
+                    abd.addQualifier(new AutowireCandidateQualifier(qualifier));
+                }
+            }
+        }
+    
+        // 定义BeanDefinition和beanName的映射关系类
+        BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
+        // 为组件设置Scope代理（如果有的话）
+        definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+        // 注册BeanDefinition到容器并且注册别名
+        BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
+    }
+
+}
+```
+
+
+@ComponentScan
+根据指定的配置自动扫描组件，通常与@Configuration注解一起使用。该注解与Spring XML配置文件中的<context:component-scan>元素作用相同。
+
+
+
 
 
 
