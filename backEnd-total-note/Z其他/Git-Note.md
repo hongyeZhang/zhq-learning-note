@@ -3,9 +3,20 @@
 
 ## 基本操作命令
 
-```$xslt
-更新远程分支列表  git remote update origin --prune  ==  git remote prune origin
+### 账号操作相关
 
+```shell script
+git config --global --list  # 显示全局
+
+
+
+```
+
+
+
+
+```shell script
+更新远程分支列表  git remote update origin --prune  ==  git remote prune origin
 git diff 显示尚未暂存的变化
 git diff --cache  显示
 git reset HEAD <file> 取消暂存操作
@@ -14,8 +25,9 @@ git checkout -- <fileName> 从暂存中撤销修改
 ```
 
 
+
 ### git pull
-```
+```shell script
 git pull /projects/first-steps-clone master  
 
 ```

@@ -2,6 +2,15 @@
 # java基础知识笔记
 
 
+## 一个对象占用多大的内存（java的内存布局）
+* IDE 插件  java object layout 
+* https://blog.csdn.net/aitangyong/article/details/46416667
+* https://www.cnblogs.com/zhanjindong/p/3757767.html
+
+
+
+
+
 ## 正则表达式
 
 

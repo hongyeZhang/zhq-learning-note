@@ -46,7 +46,7 @@
 这个对象在Spring中就是——ProxyFactoryBean。
 
 
-
+``
 ### DefaultListableBeanFactory
 BeanFactory 的子类 DefaultListableBeanFactory是更高级别的GenericApplicationContext容器中的关键委托。
 ![DefaultListableBeanFactory](../picture/spring/DefaultListableBeanFactory.png)

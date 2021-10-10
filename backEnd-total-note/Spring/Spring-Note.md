@@ -399,9 +399,7 @@ Spring Bean的完整生命周期从创建Spring容器开始，直到最终Spring
 
 
 ### @Transactional 注解有哪些属性？如何使用？
-
-
-    一般情况下，我们直接使用 @Transactional 的所有属性默认值即可。
+一般情况下，我们直接使用 @Transactional 的所有属性默认值即可。
 
 具体用法如下：
 

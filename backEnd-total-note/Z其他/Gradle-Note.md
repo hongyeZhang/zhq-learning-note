@@ -38,7 +38,7 @@ gradle -q tasks --all
 
 
 
-
+gradle :app:dependencies
 
 
 
