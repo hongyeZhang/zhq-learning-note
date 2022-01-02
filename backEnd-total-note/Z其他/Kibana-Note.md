@@ -31,6 +31,13 @@ chown -R zhq:zhq kibana
 * eschart
 
 
+## 搜索日志
+
+
+
+
+
+
 ## 操作命令
 ```shell script
 GET /_cat/indices
