@@ -38,3 +38,7 @@ source ~/.bash_profile
 lsof -i:3306
 
 ```
+
+## 系统安装软件
+* 分屏软件 rectangle
+* 视屏播放 IINA

@@ -1,3 +1,7 @@
+
+
+## 基础知识
+
 =====================   Spring MVC Note ====================================
 (1) ModelAndView
 使用ModelAndView类用来存储处理完后的结果数据，以及显示该数据的视图。从名字上
@@ -93,3 +97,11 @@ mvc分层的原理
    在postHandle中，有机会修改ModelAndView；
    在afterCompletion中，可以根据ex是否为null判断是否发生了异常，进行日志记录。
    参数中的Object handler是下一个拦截器。
+
+
+## 源码介绍
+* org.springframework.web.servlet.DispatcherServlet#doDispatch
+```java
+
+
+```
