@@ -1,6 +1,43 @@
+# ubuntu 操作笔记
+
+## 安装相关
+* 安装视频
+    * https://www.bilibili.com/video/BV1KA41177ui?spm_id_from=333.337.search-card.all.click
+
+* apt 换源
+    * ubuntu16.04换源  https://blog.csdn.net/qq_52385631/article/details/123646086
+    * 
+* 远程登录 linux 系统
+    * 10.0.2.15
+    * 远程连接工具  royal TSX
+    * ubuntu 安装 ssh  
+        * sudo apt install openssh-server
+        * sudo ufw allow 22  #开启22号窗口
 
 
-### 查找ubuntu中文件的位置
-3. locate + 文件名
-linux会把系统内所有的文件都记录在一个数据库文件中，使用locate+文件名的方法会在linux系统
-维护的这个数据库中去查找目标，相比find命令去遍历磁盘查找的方式，效率会高很多，比较推荐使用这种方法
+
+## 操作命令
+```shell script
+# 重启
+sudo reboot
+
+# 查看ip 
+ifconfig
+ip addr
+
+# 修改root 密码，直接将root 密码设为1
+sudo passwd root 
+# 切换到root
+su root
+# 退出 root
+exit
+
+# 关机
+shutdown -h now
+
+
+
+
+
+```
+
