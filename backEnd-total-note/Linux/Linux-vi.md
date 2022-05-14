@@ -1,14 +1,64 @@
 
+# 《vim 使用笔记》
+## chapter0-简介
+* 三种模式
+    * 命令模式（Command mode）
+    * 输入模式（Insert mode）
+    * 底线命令模式（Last line mode）
+* 每个模式之间的切换
+> 命令模式 -> 输入模式 : 输入 i a o 
+> 输入模式 -> 命令模式 : esc键
+> 命令模式 -> 底线命令模式 :  冒号
+> 底线命令模式 -> 命令模式 : 命令以 enter 结束运行
 
 
 
-===================        删除      ==========================================
-x        删除当前光标下的字符
+* 操作实例
+> 定位到一个单次， yaw(yank all word 复制整个单词) 复制一个单词，p粘贴
+> y4j ：复制了包括当前行在内的下4行的内容，一共5行
+
+
+### vim 键盘图
+![ClassPathXmlApplicationContext](../picture/linux/vim键盘图.gif)
+
+
+
+## chapter1-输入模式
+> i 从当前光标的前一个字母开始输入
+a  (append) 从当前光标之后开始输入
+I  从这一个行的开头进入输入模式
+A  从这一个行的末尾进入输入模式
+cc  删除当前行，然后进入INSERT MODE
+
+
+
+
+
+
+## chapter2-普通模式的相关操作
+### 命令解释
+> i : input
+y : yank
+u : undo
+c : change
+
+
+### 方向定位
+> 方向键  h(←)  j(↓)  k(↑)  l(→) 
+
+
+## 删除
+> x        删除当前光标下的字符
 dw       删除光标之后的单词剩余部分。
 d$       删除光标之后的该行剩余部分。
 dd       删除当前行。
 c        功能和d相同，区别在于完成删除操作后进入INSERT MODE
-cc       也是删除当前行，然后进入INSERT MODE
+dj       删除当前行和下一行的内容
+d5j       删除当前行和下5行的内容
+
+
+
+## 复制 + 粘贴
 
 
 ===================        复制/粘贴      ==========================================
@@ -77,11 +127,10 @@ ZZ     保存退出编辑(vi，含保存)
 ZQ    不保存退出编辑
 
 
-保存命令
+### 保存
+* 按ESC键 跳到命令模式，然后：
 
-按ESC键 跳到命令模式，然后：
-
-:w 保存文件但不退出vi
+> :w 保存文件但不退出vi
 :w file 将修改另外保存到file中，不退出vi
 :w! 强制保存，不推出vi
 :wq 保存文件并退出vi
@@ -89,3 +138,36 @@ ZQ    不保存退出编辑
 q: 不保存文件，退出vi
 :q! 不保存文件，强制退出vi
 :e! 放弃所有修改，从上次保存文件开始再编辑
+
+
+
+
+## chapter3 可视模式
+* 普通模式 按 v 进入可视模式，主要用来选中一段内容
+> 通过移动光标，选中内容，y 复制内容， d 删除内容， c 是删除并进入命令模式，
+
+
+
+
+## chapter4 参考资料
+* https://www.bilibili.com/video/BV1UQ4y1z7q5?spm_id_from=333.337.search-card.all.click
+
+* IDE 安装 vim 插件
+
+* neovim
+
+
+
+### 辅助练习游戏
+> 强烈推荐这个小游戏Vim大冒险来学习vim！
+https://vim-adventures.com/
+我的配置文件看这里：
+https://github.com/MarsWang42/My-Vim-Conf
+VimAwesome网站： 当前流行的 vim 插件
+https://vimawesome.com/
+Vim Plug Github页面：
+https://github.com/junegunn/vim-plug
+
+
+
+

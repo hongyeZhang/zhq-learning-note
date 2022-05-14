@@ -6,30 +6,35 @@
 * codeLLDB
 
 
-## mac系统下的快捷键
-全局
+## 常用快捷键
+> option + shift + 光标 ： 多行编辑
 Command + Shift + P / F1 显示命令面板
 Command + P 快速打开
 Command + Shift + N 打开新窗口
 Command + W 关闭窗口
-
-基本
-Command + X 剪切（未选中文本的情况下，剪切光标所在行）
-Command + C 复制（未选中文本的情况下，复制光标所在行）
 Option + Up 向上移动行
 Option + Down 向下移动行
 Option + Shift + Up 向上复制行
 Option + Shift + Down 向下复制行
+Command + [ 减少缩进
+Command + ] 增加缩进
+Command + Up 跳转至文件开头
+Command + Down 跳转至文件结尾
+Command + / 添加、移除行注释
+Option + Shift + A 添加、移除块注释
+
+
+
+
+
+
+
+
 Command + Shift + K 删除行
 Command + Enter 下一行插入
 Command + Shift + Enter 上一行插入
 Command + Shift + \ 跳转到匹配的括号
-Command + [ 减少缩进
-Command + ] 增加缩进
-Home 跳转至行首
-End 跳转到行尾
-Command + Up 跳转至文件开头
-Command + Down 跳转至文件结尾
+
 Ctrl + PgUp 按行向上滚动
 Ctrl + PgDown 按行向下滚动
 Command + PgUp 按屏向上滚动
@@ -42,12 +47,12 @@ Command + K Command + 0 折叠全部代码块
 Command + K Command + J 展开全部代码块
 Command + K Command + C 添加行注释
 Command + K Command + U 移除行注释
-Command + / 添加、移除行注释
-Option + Shift + A 添加、移除块注释
+
+
 Option + Z 自动换行、取消自动换行
 
-多光标与选择
-Option + 点击 插入多个光标
+## 多光标与选择
+> Option + 点击 插入多个光标
 Command + Option + Up 向上插入光标
 Command + Option + Down 向下插入光标
 Command + U 撤销上一个光标操作
@@ -65,14 +70,13 @@ Command + Shift + Option + Right 列选择 向右
 Command + Shift + Option + PgUp 列选择 向上翻页
 Command + Shift + Option + PgDown 列选择 向下翻页
 
-查找替换
-Command + F 查找
+## 查找替换
+> Command + F 查找
 Command + Option + F 替换
 Command + G 查找下一个
 Command + Shift + G 查找上一个
 Option + Enter 选中所有匹配项
 Command + D 向下选中相同内容
-Command + K Command + D 移除前一个向下选中相同内容
 
 进阶
 Ctrl + Space 打开建议
@@ -91,8 +95,8 @@ Command + Shift + , 替换为下一个值
 Command + K Command + X 删除行尾多余空格
 Command + K M 更改文件语言
 
-导航
-Command + T 显示所有符号
+## 导航
+> Command + T 显示所有符号
 Ctrl + G 跳转至某行
 Command + P 跳转到某个文件
 Command + Shift + O 跳转到某个符号
@@ -104,8 +108,8 @@ Ctrl + - 后退
 Ctrl + Shift + - 前进
 Ctrl + Shift + M Tab 切换焦点
 
-编辑器管理
-Command + W 关闭编辑器
+## 编辑器管理
+> Command + W 关闭编辑器
 Command + K F 关闭文件夹
 Command + \ 编辑器分屏
 Command + 1 切换到第一分组
@@ -118,7 +122,7 @@ Command + K Command + Shift + Right 右移编辑器
 Command + K Left 激活左侧编辑组
 Command + K Right 激活右侧编辑组
 
-文件管理
+## 文件管理
 Command + N 新建文件
 Command + O 打开文件
 Command + S 保存文件
@@ -152,7 +156,7 @@ Command + Shift + U 显示输出面板
 Command + Shift + V Markdown预览窗口
 Command + K V 分屏显示 Markdown预览窗口
 
-调试
+## 调试
 F9 设置 或 取消断点
 F5 开始 或 继续
 F11 进入
@@ -160,7 +164,7 @@ Shift + F11 跳出
 F10 跳过
 Command + K Command + I 显示悬停信息
 
-集成终端
+## 集成终端
 Ctrl + 显示终端 Ctrl + Shift + 新建终端
 Command + Up 向上滚动
 Command + Down 向下滚动

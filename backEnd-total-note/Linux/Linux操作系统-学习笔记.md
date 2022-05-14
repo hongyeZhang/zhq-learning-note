@@ -20,6 +20,9 @@
 
 ## chapter2 虚拟机的安装和配置
 
+
+
+
 ## chapter3 linux 的命令
 
 

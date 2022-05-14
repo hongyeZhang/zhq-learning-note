@@ -37,7 +37,11 @@ shutdown -h now
 
 
 
+# 安装 curl 软件
+sudo apt-get install curl
 
 
 ```
+
+
 

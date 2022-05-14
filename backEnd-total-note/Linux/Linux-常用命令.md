@@ -1,7 +1,57 @@
-## 查看主机信息
 
-### 查看CPU使用率
-top 查看CPU访问率
+
+# 《常用命令速记》
+
+
+
+
+## cahpter0-man-查看手册
+* linux manual page  通常情况下，手册页是用 less 打开的，所以 less 命令的键盘快捷键在 man 中也可以使用
+* 要准确的定位一份man文档，应该指出名字 + section
+* man 文档基本遵循一套写作模板，对读者重要的章节有：
+    * NAME：名字和一句话简单描述。
+    * SYNOPSIS：语法格式，比如 shell 命令会罗列所有的 option 和 argument 用法。
+    * DESCRIPTION：详细用法解释，内容比较多。可以根据自己感兴趣的点搜索。
+    * EXAMPLES：用法举例，有时直接翻到最后看例子，会更容易理解。
+* 语法格式
+    * [-abc] ：表示中括号内任一一个 option 都是可选的。
+    * -a|-b：竖线分隔的 option 不可同时出现
+    * … ：表示可重复的
+    * <>：表示必选
+
+
+
+
+> man -k -k 选项，可以通过正则表达式模糊匹配某个命令，man -k printf 会搜索所有 man 文档中名字或描述包含 printf 关键字的
+man -k "^print" 正则搜索，搜索名字或描述以 print 开头的
+man printf 
+man 3 printf printf是C语言的库函数
+man -f printf 要列出所有 section，可以增加 -f 选项 
+
+
+
+
+
+
+### ssh
+```shell
+# 退出连接
+ctrl + D / logout / exit 
+```
+
+
+
+
+
+
+
+
+
+
+## 查看基本信息
+
+* 查看CPU使用率         
+    * top 查看CPU访问率
 
 ### 查看端口的占用情况
 lsof -i:端口号 用于查看某一端口的占用情况，比如查看8000端口使用情况，lsof -i:8000

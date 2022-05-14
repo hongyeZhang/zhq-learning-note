@@ -64,6 +64,8 @@ public class HelloServiceApplication {
 
 ### 图片-例子
 ![Alt text](https://mazhuang.org/favicon.ico "favicon")
+![ClassPathXmlApplicationContext](../picture/spring/ClassPathXmlApplicationContext.png)
+
 
 
 ### 水平分割线-例子
