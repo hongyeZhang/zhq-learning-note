@@ -1,5 +1,172 @@
 
 
+
+# Shell 学习
+
+## 参考学习资料
+* 参考学习资料
+    * 千锋 Shell 脚本自动化编程
+    * 基础命令查询 + 基本笔记 : 菜鸟教程 https://www.runoob.com/linux/linux-shell.html
+
+## chapter1 shell 作用
+* 自动化批量系统初始化程序 (update、软件安装、时区设置)
+* 批量软件部署(LAMP LNMP Tomcat LVS Nginx)
+* zabbix 信息采集等
+
+## 基础知识
+* Shell 的分类
+    * 默认的shell ： /bin/bash、csh ksh tcsh sh  nologin zsh（最庞大的）
+
+```bash
+# 自动补全的命令
+yum -y install bash-completion
+# 历史命令记忆
+history n 
+# ！+ 命令的序号
+! commandNum  
+
+
+# 添加别名、显示前5行、取消别名（临时生效），将别名添加到系统 .bashrc 文件中永久生效
+alias h5='head -5'
+unalias h5 
+cat /etc/passwd | head -5 
+
+
+```
+
+## chapter2 bash的初始化
+* bash环境变量文件的加载
+    * /etc/profile 全局公有配置，所有用户登录时都会读取该文件
+    * /etc/bashrc 全局配置文件，centos中，ubuntu 没有
+    * ~/.profile 
+    * ~/.bash_login
+    * ~/.bash_profile
+    * ~/.bashrc
+    * ~/.bash_logout
+
+* bash 快捷键
+> ctrl + a 
+ctrl + c  强制终止当前命令
+ctrl + d 退出当前终端
+Ctrl + z 暂停并放入后台
+
+* 前后台作业控制: 也是前后台进程，有对应的 pid
+    * 前台作业：用户可以参与及控制的
+    * 后台作业：内存中自由运行，用户无法参与或者ctrl+c来终止的
+
+> command + & 后台运行
+ctrl + z 将当前的命令切换到后台
+jobs 查看后台的作业状态
+fg %n 将后台运行的作业n切换到前台
+bg %n 让指定的作业n在后台运行
+kill %n 将指定的作业杀死
+
+## chapter7 输入、输出重定向
+* 硬件设备和文件描述符 
+    * 0 stdin 标准输入文件  键盘
+    * 1 stdout 标准输出文件  显示器
+    * 2 stderr 标准错误输出文件  显示器
+ 
+### 7.1 输出重定向
+> command >file 以覆盖的方式，将 command 的正确输出结果输出到 file 文件中
+command >>file  以追加的方式
+command 2>file  将错误信息输出
+command >file 2>&1  覆盖方式，将正确和错误信息都保存到同一个文件中
+command >file1 2>file2  正确的覆盖到 file1，错误的覆盖到 file2
+
+ls / &>/dev/null 将正确和错误的结果都导入到回收站中
+
+### 7.2 输入重定向
+> wc -l < readme.txt
+
+```shell 
+#!/bin/bash
+# 读入文件并打印
+while read str; do
+	echo $str
+done <readme.txt
+```
+
+### 7.3 管道
+* | tee
+
+> cat /etc/passwd | tee hello.txt
+
+
+### 7.4 命令排序
+* && || 具备逻辑判断功能
+* ; 分号可以连接两个命令，不具备判断性，不会形成逻辑上的短路
+
+### 7.5通配符
+```shell
+ls /etc/???.conf
+ls /etc/*.conf
+ls file*
+```
+
+## chapter8 shell脚本规范
+* 第一行需要有 shebang(#!) 指定脚本的解释器
+* 脚本调试
+> -n 不执行 script，仅检查语法问题
+-v 执行 script 前，先将 script 输出到屏幕
+-x 
+chmod a+x a.sh 给脚本添加执行权限
+. test.sh / source test.sh
+
+
+### 作业脱机管理
+* nohup 忽略所有的挂断信号
+```shell
+
+nohup ./echo_time.sh
+nohup ./echo_time.sh >temp2.log 2>&1 &
+```
+
+
+## chapter11 shell变量
+```shell
+# 设置、输出、取消变量
+dir=`pwd`
+echo $dir 
+unset dir
+
+echo $PATH
+
+
+```
+* "" 双引号是弱引用  '' 是强引用 `` 反引号等价于 $() 
+
+```shell
+touch `date +%F`_file1.txt
+touch $(date +%F)_file1.txt
+
+# 变量运算
+# 整数运算
+expr 1 + 1
+expr $a + $b
+echo $[5+2]
+echo $(($a+$b))
+let sum=2+3; echo $sum
+
+# bc 是个任意精度的计算器
+echo "2*4" | bc
+echo "print 5/2" | python
+echo "print(5/2)" | python3
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### EOF
 EOF本意是 End Of File，表明到了文件末尾。
 ```

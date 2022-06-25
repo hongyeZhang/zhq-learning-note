@@ -14,3 +14,11 @@
     * https://nju-projectn.github.io/ics-pa-gitbook/ics2019/   南大的PA
 
 
+
+* 学习计划
+    * linux 下的 c/c++ 相关的书籍学习!!!  c语言内嵌汇编代码
+    * linux  shell 编程
+    * python
+    * rust
+
+

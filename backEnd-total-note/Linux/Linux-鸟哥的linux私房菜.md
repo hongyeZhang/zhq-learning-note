@@ -18,7 +18,8 @@
     * -a|-b：竖线分隔的 option 不可同时出现
     * … ：表示可重复的
     * <>：表示必选
-
+* 查找 man 文档的存储位置
+    * man 文档是存储一个特定位置，通过命令 man -w [command] 可以定位文档
 
 
 
@@ -27,6 +28,31 @@ man -k "^print" 正则搜索，搜索名字或描述以 print 开头的
 man printf 
 man 3 printf printf是C语言的库函数
 man -f printf 要列出所有 section，可以增加 -f 选项 
+
+
+
+## chapter10 认识与学习bash
+
+
+```shell
+# 从键盘输入内容赋予指定的变量名
+read -p "plaese keyin your name" -t 30 named
+
+cat /etc/passwd | awk '{FS=":"} $3 '
+
+
+# 所有人添加可执行权限：
+chmod a+x 文件名；
+# 文件所有者添加可执行权限：
+chmod u+x 文件名；
+# 所在组添加可执行权限：
+chmod g+x 文件名；
+# 所在组以外的人添加可执行权限：
+chmod o+x 文件名；
+
+
+```
+
 
 
 
